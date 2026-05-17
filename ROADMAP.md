@@ -28,11 +28,13 @@ opening the next.
 - Per-world leaderboards
 - Full keyboard control
 
-### Phase 2 — A richer platformer ⬜ Next
-- More tile types (moving platforms, bouncers, one-way platforms)
-- Sound effects and music
-- Themed block styles / world themes
-- Bigger or scrollable levels
+### Phase 2 — A richer platformer 🔄 In progress
+- ✅ Bouncer and one-way platform tiles
+- ✅ Sound effects (jump, coin, bounce, death, win)
+- ⬜ Moving platforms
+- ⬜ Themed block styles / world themes
+- ⬜ Bigger or scrollable levels
+- ⬜ Background music
 
 ### Phase 3 — Discovery & social ⬜ Planned
 - Better Discover page: search, sort, featured worlds
@@ -52,5 +54,6 @@ opening the next.
 
 ## Changelog
 
+- **2026-05-18** — Phase 2 started: bouncer + one-way platform tiles, sound effects.
 - **2026-05-18** — Phase 1 complete: world editor + play runtime + leaderboards.
 - **2026-05-18** — Phase 0 complete: scaffold, accounts, database, live on Railway.

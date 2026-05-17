@@ -12,6 +12,8 @@ import {
   SPIKE,
   COIN,
   GOAL,
+  BOUNCER,
+  ONEWAY,
   PALETTE,
   normalizeLevel,
 } from "../game/level";
@@ -88,6 +90,16 @@ export default function Editor() {
           ctx.lineTo(x + 12, y + 17);
           ctx.closePath();
           ctx.fill();
+        } else if (t === BOUNCER) {
+          ctx.fillStyle = "#a86a26";
+          ctx.fillRect(x + 3, y + TILE - 9, TILE - 6, 9);
+          ctx.fillStyle = "#ffce5c";
+          ctx.fillRect(x + 3, y + TILE - 16, TILE - 6, 8);
+        } else if (t === ONEWAY) {
+          ctx.fillStyle = "#7c93c7";
+          ctx.fillRect(x, y, TILE, 9);
+          ctx.fillStyle = "#97abd6";
+          ctx.fillRect(x, y, TILE, 3);
         }
       }
     }

@@ -7,7 +7,10 @@ import {
   SPIKE,
   COIN,
   GOAL,
+  BOUNCER,
+  ONEWAY,
 } from "./level";
+import { sfx } from "./sound";
 
 interface Props {
   level: Level;
@@ -67,7 +70,11 @@ export default function Runtime({ level, onWin }: Props) {
       if (c < 0 || c >= cols || r < 0 || r >= rows) return SOLID; // solid borders
       return tiles[r * cols + c];
     }
-    const solidAt = (c: number, r: number) => tileAt(c, r) === SOLID;
+    // Tiles that block movement on every side.
+    const blocks = (c: number, r: number) => {
+      const t = tileAt(c, r);
+      return t === SOLID || t === BOUNCER;
+    };
 
     function update() {
       frames++;
@@ -80,6 +87,7 @@ export default function Runtime({ level, onWin }: Props) {
       if (jump && player.onGround) {
         player.vy = -11;
         player.onGround = false;
+        sfx.jump();
       }
       player.vy = Math.min(player.vy + 0.55, 13);
 
@@ -90,7 +98,7 @@ export default function Runtime({ level, onWin }: Props) {
       if (player.vx > 0) {
         const c = Math.floor((player.x + PW) / TILE);
         for (let r = top; r <= bottom; r++) {
-          if (solidAt(c, r)) {
+          if (blocks(c, r)) {
             player.x = c * TILE - PW;
             break;
           }
@@ -98,7 +106,7 @@ export default function Runtime({ level, onWin }: Props) {
       } else if (player.vx < 0) {
         const c = Math.floor(player.x / TILE);
         for (let r = top; r <= bottom; r++) {
-          if (solidAt(c, r)) {
+          if (blocks(c, r)) {
             player.x = (c + 1) * TILE;
             break;
           }
@@ -106,6 +114,7 @@ export default function Runtime({ level, onWin }: Props) {
       }
 
       // Vertical move + collision.
+      const prevBottom = player.y + PH;
       player.y += player.vy;
       player.onGround = false;
       const lft = Math.floor(player.x / TILE);
@@ -113,7 +122,21 @@ export default function Runtime({ level, onWin }: Props) {
       if (player.vy > 0) {
         const r = Math.floor((player.y + PH) / TILE);
         for (let c = lft; c <= rgt; c++) {
-          if (solidAt(c, r)) {
+          const t = tileAt(c, r);
+          if (t === SOLID) {
+            player.y = r * TILE - PH;
+            player.vy = 0;
+            player.onGround = true;
+            break;
+          }
+          if (t === BOUNCER) {
+            player.y = r * TILE - PH;
+            player.vy = -16.5;
+            sfx.bounce();
+            break;
+          }
+          // One-way platforms catch the player only when landing from above.
+          if (t === ONEWAY && prevBottom <= r * TILE + 2) {
             player.y = r * TILE - PH;
             player.vy = 0;
             player.onGround = true;
@@ -123,7 +146,7 @@ export default function Runtime({ level, onWin }: Props) {
       } else if (player.vy < 0) {
         const r = Math.floor(player.y / TILE);
         for (let c = lft; c <= rgt; c++) {
-          if (solidAt(c, r)) {
+          if (blocks(c, r)) {
             player.y = (r + 1) * TILE;
             player.vy = 0;
             break;
@@ -134,6 +157,7 @@ export default function Runtime({ level, onWin }: Props) {
       // Fell out of the world.
       if (player.y > rows * TILE + 240) {
         deaths++;
+        sfx.die();
         spawnPlayer();
         return;
       }
@@ -148,16 +172,19 @@ export default function Runtime({ level, onWin }: Props) {
           const t = tileAt(c, r);
           if (t === SPIKE) {
             deaths++;
+            sfx.die();
             spawnPlayer();
             return;
           }
           if (t === COIN) {
             tiles[r * cols + c] = EMPTY;
             coins++;
+            sfx.coin();
           }
           if (t === GOAL && !finished) {
             finished = true;
             const score = coins * 1000 + Math.max(0, 12000 - frames);
+            sfx.win();
             setWon({ score });
             onWin?.(score);
           }
@@ -205,6 +232,16 @@ export default function Runtime({ level, onWin }: Props) {
             ctx.lineTo(x + TILE / 2 + 3, y + 18);
             ctx.closePath();
             ctx.fill();
+          } else if (t === BOUNCER) {
+            ctx.fillStyle = "#a86a26";
+            ctx.fillRect(x + 3, y + TILE - 9, TILE - 6, 9);
+            ctx.fillStyle = "#ffce5c";
+            ctx.fillRect(x + 3, y + TILE - 16, TILE - 6, 8);
+          } else if (t === ONEWAY) {
+            ctx.fillStyle = "#7c93c7";
+            ctx.fillRect(x, y, TILE, 9);
+            ctx.fillStyle = "#97abd6";
+            ctx.fillRect(x, y, TILE, 3);
           }
         }
       }

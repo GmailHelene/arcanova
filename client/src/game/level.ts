@@ -10,8 +10,10 @@ export const SOLID = 1;
 export const SPIKE = 2;
 export const COIN = 3;
 export const GOAL = 4;
+export const BOUNCER = 5;
+export const ONEWAY = 6;
 
-export type TileType = 0 | 1 | 2 | 3 | 4;
+export type TileType = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface Level {
   version: number;
@@ -30,6 +32,8 @@ export interface PaletteEntry {
 // Tools shown in the editor palette. "Spawn" and "Eraser" are handled specially.
 export const PALETTE: PaletteEntry[] = [
   { type: SOLID, label: "Ground", color: "#5b8c5a" },
+  { type: ONEWAY, label: "Platform", color: "#7c93c7" },
+  { type: BOUNCER, label: "Bouncer", color: "#e8a13c" },
   { type: SPIKE, label: "Spikes", color: "#d6536d" },
   { type: COIN, label: "Coin", color: "#ffce5c" },
   { type: GOAL, label: "Goal", color: "#4fd6ff" },
