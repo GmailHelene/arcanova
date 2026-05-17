@@ -38,7 +38,9 @@ opening the next.
 - ✅ Moving platforms (horizontal + vertical)
 - ✅ World themes (Twilight, Jungle, Space, Cave, Snow, Lava)
 - ✅ Bigger, scrolling levels (camera follows the player)
-- ⬜ Background music
+- ✅ Background music (with an on/off toggle)
+- ⬜ Mobile / touch controls — the game is keyboard-only today, so it is
+  not yet playable on phones or tablets
 
 ### Phase 3 — Discovery & social ⬜ Planned
 - Better Discover page: search, sort, featured worlds
@@ -64,6 +66,7 @@ opening the next.
 
 ## Changelog
 
+- **2026-05-18** — Phase 2: background music with an on/off toggle.
 - **2026-05-18** — Phase 2: wider levels (90 tiles) with a scrolling camera.
 - **2026-05-18** — Creators can delete their own worlds.
 - **2026-05-18** — Phase 2: world themes (6 themes — sky + ground styling).

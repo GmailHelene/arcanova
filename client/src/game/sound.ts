@@ -45,3 +45,52 @@ export const sfx = {
     setTimeout(() => blip(784, 0.28, { type: "triangle", volume: 0.14 }), 270);
   },
 };
+
+// --- Background music: a gentle looping pentatonic pad ---
+
+let musicTimer: number | null = null;
+let musicStep = 0;
+
+// Minor-pentatonic melody, as semitone offsets from a base note.
+const MELODY = [0, 3, 5, 7, 10, 7, 5, 3];
+
+function tone(freq: number, duration: number, volume: number, type: OscillatorType) {
+  const a = audio();
+  const now = a.currentTime;
+  const osc = a.createOscillator();
+  const gain = a.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, now);
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(volume, now + 0.06);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  osc.connect(gain);
+  gain.connect(a.destination);
+  osc.start(now);
+  osc.stop(now + duration + 0.05);
+}
+
+const noteFreq = (semitone: number) => 220 * Math.pow(2, semitone / 12);
+
+export const music = {
+  start() {
+    if (musicTimer !== null) return;
+    audio();
+    musicStep = 0;
+    const beat = () => {
+      const n = MELODY[musicStep % MELODY.length];
+      tone(noteFreq(n - 12), 0.5, 0.05, "sine"); // soft bass
+      tone(noteFreq(n), 0.34, 0.035, "triangle"); // melody
+      if (musicStep % 2 === 0) tone(noteFreq(n + 7), 0.3, 0.022, "triangle");
+      musicStep++;
+    };
+    beat();
+    musicTimer = window.setInterval(beat, 460);
+  },
+  stop() {
+    if (musicTimer !== null) {
+      clearInterval(musicTimer);
+      musicTimer = null;
+    }
+  },
+};

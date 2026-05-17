@@ -13,7 +13,7 @@ import {
   MOVER_V,
   getTheme,
 } from "./level";
-import { sfx } from "./sound";
+import { sfx, music } from "./sound";
 
 interface Props {
   level: Level;
@@ -27,6 +27,14 @@ export default function Runtime({ level, onWin }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [runId, setRunId] = useState(0);
   const [won, setWon] = useState<{ score: number } | null>(null);
+  const [musicOn, setMusicOn] = useState(true);
+
+  // Background music runs while enabled, independent of the game loop.
+  useEffect(() => {
+    if (!musicOn) return;
+    music.start();
+    return () => music.stop();
+  }, [musicOn]);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -408,9 +416,17 @@ export default function Runtime({ level, onWin }: Props) {
           <button className="btn" onClick={replay}>Play again</button>
         </div>
       )}
-      <p className="muted controls-hint">
-        Move: arrows or A / D · Jump: up, W or space
-      </p>
+      <div className="runtime-footer">
+        <span className="muted controls-hint">
+          Move: arrows or A / D · Jump: up, W or space
+        </span>
+        <button
+          className="btn-ghost"
+          onClick={() => setMusicOn((m) => !m)}
+        >
+          {musicOn ? "Music: on" : "Music: off"}
+        </button>
+      </div>
     </div>
   );
 }
