@@ -6,6 +6,10 @@ A platform where players build, share, play and compete on their own game worlds
 The heart of it is the **creation loop**: build a world → publish it → others play it
 and compete on the leaderboard.
 
+The full long-term vision (competition, creator economy, social hub, AI features,
+esports) lives in `VISION.md`. This roadmap is deliberately leaner — it is the
+ordered, achievable path toward that vision, not the dream itself.
+
 ## Guiding principle
 
 Build the *real* skeleton of the full platform, then fill it in one room at a time.
