@@ -12,8 +12,10 @@ export const COIN = 3;
 export const GOAL = 4;
 export const BOUNCER = 5;
 export const ONEWAY = 6;
+export const MOVER_H = 7; // moving platform — travels horizontally
+export const MOVER_V = 8; // moving platform — travels vertically
 
-export type TileType = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type TileType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export interface Level {
   version: number;
@@ -34,6 +36,8 @@ export const PALETTE: PaletteEntry[] = [
   { type: SOLID, label: "Ground", color: "#5b8c5a" },
   { type: ONEWAY, label: "Platform", color: "#7c93c7" },
   { type: BOUNCER, label: "Bouncer", color: "#e8a13c" },
+  { type: MOVER_H, label: "Mover ↔", color: "#c98a3a" },
+  { type: MOVER_V, label: "Mover ↕", color: "#c98a3a" },
   { type: SPIKE, label: "Spikes", color: "#d6536d" },
   { type: COIN, label: "Coin", color: "#ffce5c" },
   { type: GOAL, label: "Goal", color: "#4fd6ff" },

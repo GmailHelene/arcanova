@@ -31,7 +31,7 @@ opening the next.
 ### Phase 2 — A richer platformer 🔄 In progress
 - ✅ Bouncer and one-way platform tiles
 - ✅ Sound effects (jump, coin, bounce, death, win)
-- ⬜ Moving platforms
+- ✅ Moving platforms (horizontal + vertical)
 - ⬜ Themed block styles / world themes
 - ⬜ Bigger or scrollable levels
 - ⬜ Background music
@@ -54,6 +54,7 @@ opening the next.
 
 ## Changelog
 
+- **2026-05-18** — Phase 2: moving platforms (horizontal + vertical).
 - **2026-05-18** — Phase 2 started: bouncer + one-way platform tiles, sound effects.
 - **2026-05-18** — Phase 1 complete: world editor + play runtime + leaderboards.
 - **2026-05-18** — Phase 0 complete: scaffold, accounts, database, live on Railway.

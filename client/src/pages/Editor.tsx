@@ -14,6 +14,8 @@ import {
   GOAL,
   BOUNCER,
   ONEWAY,
+  MOVER_H,
+  MOVER_V,
   PALETTE,
   normalizeLevel,
 } from "../game/level";
@@ -100,6 +102,18 @@ export default function Editor() {
           ctx.fillRect(x, y, TILE, 9);
           ctx.fillStyle = "#97abd6";
           ctx.fillRect(x, y, TILE, 3);
+        } else if (t === MOVER_H || t === MOVER_V) {
+          ctx.fillStyle = "#a86a26";
+          ctx.fillRect(x, y + 8, TILE, TILE - 16);
+          ctx.fillStyle = "#c98a3a";
+          ctx.fillRect(x, y + 8, TILE, 4);
+          ctx.fillStyle = "#fff";
+          ctx.font = "14px Segoe UI, sans-serif";
+          ctx.fillText(
+            t === MOVER_H ? "↔" : "↕",
+            x + TILE / 2 - 6,
+            y + TILE / 2 + 6
+          );
         }
       }
     }

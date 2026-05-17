@@ -9,6 +9,8 @@ import {
   GOAL,
   BOUNCER,
   ONEWAY,
+  MOVER_H,
+  MOVER_V,
 } from "./level";
 import { sfx } from "./sound";
 
@@ -35,6 +37,35 @@ export default function Runtime({ level, onWin }: Props) {
 
     const tiles = level.tiles.slice(); // mutable copy so coins can be removed
 
+    // Moving platforms — derived from MOVER tiles, animated as entities.
+    interface Mover {
+      ox: number;
+      oy: number;
+      axis: 0 | 1; // 0 = horizontal, 1 = vertical
+      x: number;
+      y: number;
+      dx: number;
+      dy: number;
+    }
+    const movers: Mover[] = [];
+    for (let r = 0; r < level.rows; r++) {
+      for (let c = 0; c < level.cols; c++) {
+        const t = level.tiles[r * level.cols + c];
+        if (t === MOVER_H || t === MOVER_V) {
+          movers.push({
+            ox: c * TILE,
+            oy: r * TILE,
+            axis: t === MOVER_H ? 0 : 1,
+            x: c * TILE,
+            y: r * TILE,
+            dx: 0,
+            dy: 0,
+          });
+        }
+      }
+    }
+    const MOVE_AMP = 3 * TILE;
+
     const keys: Record<string, boolean> = {};
     const down = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
@@ -56,6 +87,7 @@ export default function Runtime({ level, onWin }: Props) {
     let deaths = 0;
     let frames = 0;
     let finished = false;
+    let ridingMover: Mover | null = null;
 
     function spawnPlayer() {
       player.x = level.spawn.col * TILE + (TILE - PW) / 2;
@@ -78,6 +110,23 @@ export default function Runtime({ level, onWin }: Props) {
 
     function update() {
       frames++;
+
+      // Animate moving platforms; carry the player if standing on one.
+      const phase = Math.sin(frames * 0.025);
+      for (const m of movers) {
+        const nx = m.axis === 0 ? m.ox + phase * MOVE_AMP : m.ox;
+        const ny = m.axis === 1 ? m.oy + phase * MOVE_AMP : m.oy;
+        m.dx = nx - m.x;
+        m.dy = ny - m.y;
+        m.x = nx;
+        m.y = ny;
+      }
+      if (ridingMover) {
+        player.x += ridingMover.dx;
+        player.y += ridingMover.dy;
+      }
+      ridingMover = null;
+
       const left = keys["arrowleft"] || keys["a"];
       const right = keys["arrowright"] || keys["d"];
       const jump = keys["arrowup"] || keys["w"] || keys[" "];
@@ -109,6 +158,26 @@ export default function Runtime({ level, onWin }: Props) {
           if (blocks(c, r)) {
             player.x = (c + 1) * TILE;
             break;
+          }
+        }
+      }
+
+      // Push out of moving platforms horizontally.
+      for (const m of movers) {
+        if (
+          player.x < m.x + TILE &&
+          player.x + PW > m.x &&
+          player.y < m.y + TILE &&
+          player.y + PH > m.y
+        ) {
+          if (player.vx > 0) {
+            player.x = m.x - PW;
+          } else if (player.vx < 0) {
+            player.x = m.x + TILE;
+          } else {
+            const overlapLeft = player.x + PW - m.x;
+            const overlapRight = m.x + TILE - player.x;
+            player.x = overlapLeft < overlapRight ? m.x - PW : m.x + TILE;
           }
         }
       }
@@ -150,6 +219,26 @@ export default function Runtime({ level, onWin }: Props) {
             player.y = (r + 1) * TILE;
             player.vy = 0;
             break;
+          }
+        }
+      }
+
+      // Land on / collide with moving platforms vertically.
+      for (const m of movers) {
+        if (
+          player.x < m.x + TILE &&
+          player.x + PW > m.x &&
+          player.y < m.y + TILE &&
+          player.y + PH > m.y
+        ) {
+          if (player.vy < 0) {
+            player.y = m.y + TILE;
+            player.vy = 0;
+          } else {
+            player.y = m.y - PH;
+            player.vy = 0;
+            player.onGround = true;
+            ridingMover = m;
           }
         }
       }
@@ -244,6 +333,14 @@ export default function Runtime({ level, onWin }: Props) {
             ctx.fillRect(x, y, TILE, 3);
           }
         }
+      }
+
+      // Moving platforms.
+      for (const m of movers) {
+        ctx.fillStyle = "#a86a26";
+        ctx.fillRect(m.x, m.y + 5, TILE, TILE - 10);
+        ctx.fillStyle = "#c98a3a";
+        ctx.fillRect(m.x, m.y + 5, TILE, 5);
       }
 
       // Player.
