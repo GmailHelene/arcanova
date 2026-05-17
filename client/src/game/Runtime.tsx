@@ -11,6 +11,7 @@ import {
   ONEWAY,
   MOVER_H,
   MOVER_V,
+  getTheme,
 } from "./level";
 import { sfx } from "./sound";
 
@@ -34,6 +35,7 @@ export default function Runtime({ level, onWin }: Props) {
     const rows = level.rows;
     canvas.width = cols * TILE;
     canvas.height = rows * TILE;
+    const theme = getTheme(level.theme);
 
     const tiles = level.tiles.slice(); // mutable copy so coins can be removed
 
@@ -284,8 +286,8 @@ export default function Runtime({ level, onWin }: Props) {
     function draw() {
       // Sky.
       const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      sky.addColorStop(0, "#2a2356");
-      sky.addColorStop(1, "#181433");
+      sky.addColorStop(0, theme.skyTop);
+      sky.addColorStop(1, theme.skyBottom);
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -295,9 +297,9 @@ export default function Runtime({ level, onWin }: Props) {
           const x = c * TILE;
           const y = r * TILE;
           if (t === SOLID) {
-            ctx.fillStyle = "#5b8c5a";
+            ctx.fillStyle = theme.ground;
             ctx.fillRect(x, y, TILE, TILE);
-            ctx.fillStyle = "#6fa86d";
+            ctx.fillStyle = theme.groundTop;
             ctx.fillRect(x, y, TILE, 5);
           } else if (t === SPIKE) {
             ctx.fillStyle = "#d6536d";

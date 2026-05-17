@@ -23,6 +23,33 @@ export interface Level {
   rows: number;
   tiles: number[]; // flat array, length cols * rows, row-major
   spawn: { col: number; row: number };
+  theme: string;
+}
+
+// A theme gives a level a visual identity. Gameplay tiles (spikes, coins,
+// goal, bouncer) keep fixed colors so they stay readable in every theme.
+export interface Theme {
+  id: string;
+  name: string;
+  skyTop: string;
+  skyBottom: string;
+  ground: string;
+  groundTop: string;
+}
+
+export const THEMES: Theme[] = [
+  { id: "twilight", name: "Twilight", skyTop: "#2a2356", skyBottom: "#181433", ground: "#5b8c5a", groundTop: "#6fa86d" },
+  { id: "jungle", name: "Jungle", skyTop: "#1f4d2e", skyBottom: "#0e2a1a", ground: "#6b4a2a", groundTop: "#3f8a3f" },
+  { id: "space", name: "Space", skyTop: "#0a0a2e", skyBottom: "#02020f", ground: "#454569", groundTop: "#8585bd" },
+  { id: "cave", name: "Cave", skyTop: "#231f2e", skyBottom: "#0c0a14", ground: "#4a3f55", groundTop: "#6a5a78" },
+  { id: "snow", name: "Snow", skyTop: "#5a7fae", skyBottom: "#324a6e", ground: "#8f9db6", groundTop: "#eef3ff" },
+  { id: "lava", name: "Lava", skyTop: "#4a1820", skyBottom: "#1c0a0c", ground: "#3a2520", groundTop: "#c7531f" },
+];
+
+export const DEFAULT_THEME = "twilight";
+
+export function getTheme(id?: string): Theme {
+  return THEMES.find((t) => t.id === id) ?? THEMES[0];
 }
 
 export interface PaletteEntry {
@@ -53,6 +80,7 @@ export function createEmptyLevel(): Level {
     rows: ROWS,
     tiles,
     spawn: { col: 2, row: ROWS - 2 },
+    theme: DEFAULT_THEME,
   };
 }
 
@@ -68,5 +96,6 @@ export function normalizeLevel(def: unknown): Level {
     rows: ROWS,
     tiles: d.tiles.map((t) => Number(t) || 0),
     spawn: d.spawn ?? { col: 2, row: ROWS - 2 },
+    theme: typeof d.theme === "string" ? d.theme : DEFAULT_THEME,
   };
 }

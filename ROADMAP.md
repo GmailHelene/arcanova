@@ -32,7 +32,7 @@ opening the next.
 - ✅ Bouncer and one-way platform tiles
 - ✅ Sound effects (jump, coin, bounce, death, win)
 - ✅ Moving platforms (horizontal + vertical)
-- ⬜ Themed block styles / world themes
+- ✅ World themes (Twilight, Jungle, Space, Cave, Snow, Lava)
 - ⬜ Bigger or scrollable levels
 - ⬜ Background music
 
@@ -54,6 +54,7 @@ opening the next.
 
 ## Changelog
 
+- **2026-05-18** — Phase 2: world themes (6 themes — sky + ground styling).
 - **2026-05-18** — Phase 2: moving platforms (horizontal + vertical).
 - **2026-05-18** — Phase 2 started: bouncer + one-way platform tiles, sound effects.
 - **2026-05-18** — Phase 1 complete: world editor + play runtime + leaderboards.

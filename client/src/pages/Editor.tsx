@@ -17,6 +17,8 @@ import {
   MOVER_H,
   MOVER_V,
   PALETTE,
+  THEMES,
+  getTheme,
   normalizeLevel,
 } from "../game/level";
 
@@ -55,8 +57,12 @@ export default function Editor() {
     const ctx = canvas.getContext("2d")!;
     canvas.width = level.cols * TILE;
     canvas.height = level.rows * TILE;
+    const theme = getTheme(level.theme);
 
-    ctx.fillStyle = "#181433";
+    const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    sky.addColorStop(0, theme.skyTop);
+    sky.addColorStop(1, theme.skyBottom);
+    ctx.fillStyle = sky;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     for (let r = 0; r < level.rows; r++) {
@@ -65,8 +71,10 @@ export default function Editor() {
         const x = c * TILE;
         const y = r * TILE;
         if (t === SOLID) {
-          ctx.fillStyle = "#5b8c5a";
+          ctx.fillStyle = theme.ground;
           ctx.fillRect(x, y, TILE, TILE);
+          ctx.fillStyle = theme.groundTop;
+          ctx.fillRect(x, y, TILE, 5);
         } else if (t === SPIKE) {
           ctx.fillStyle = "#d6536d";
           ctx.beginPath();
@@ -214,6 +222,18 @@ export default function Editor() {
         </div>
       ) : (
         <>
+          <div className="theme-row">
+            <label>Theme</label>
+            <select
+              value={level.theme}
+              onChange={(e) => setLevel({ ...level, theme: e.target.value })}
+            >
+              {THEMES.map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="palette">
             {PALETTE.map((p) => (
               <button
