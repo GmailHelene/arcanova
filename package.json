@@ -1,0 +1,21 @@
+{
+  "name": "arcanova",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Arcanova - a creation platform where players build and share their own game worlds",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,magenta \"npm:dev -w server\" \"npm:dev -w client\"",
+    "build": "npm run build -w client && npm run build -w server",
+    "start": "npm run start -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
