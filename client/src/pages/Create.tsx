@@ -64,17 +64,14 @@ export default function Create() {
 
       <div className="grid">
         {games.map((g) => (
-          <div key={g.id} className="card">
+          <Link key={g.id} to={`/edit/${g.id}`} className="card">
             <div className="card-art">✦</div>
             <h3>{g.title}</h3>
             <span className="card-meta">
               {g.published ? "Published" : "Draft"} · {g.plays} plays
             </span>
-            <div className="stage placeholder small">
-              {/* Next milestone: open this world in the editor. */}
-              <span>World editor — coming next</span>
-            </div>
-          </div>
+            <span className="card-meta">Open editor →</span>
+          </Link>
         ))}
         {games.length === 0 && (
           <p className="muted">No worlds yet — create your first one above.</p>

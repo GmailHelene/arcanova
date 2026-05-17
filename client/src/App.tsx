@@ -3,6 +3,7 @@ import { useAuth } from "./auth";
 import Discover from "./pages/Discover";
 import Play from "./pages/Play";
 import Create from "./pages/Create";
+import Editor from "./pages/Editor";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/" element={<Discover />} />
           <Route path="/play/:id" element={<Play />} />
           <Route path="/create" element={<Create />} />
+          <Route path="/edit/:id" element={<Editor />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
         </Routes>
