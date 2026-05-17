@@ -77,8 +77,17 @@ export default function Editor() {
           ctx.arc(x + TILE / 2, y + TILE / 2, 9, 0, Math.PI * 2);
           ctx.fill();
         } else if (t === GOAL) {
+          // Faint cell highlight + pole and flag, so goals are easy to spot.
+          ctx.fillStyle = "rgba(79,214,255,0.18)";
+          ctx.fillRect(x, y, TILE, TILE);
           ctx.fillStyle = "#4fd6ff";
-          ctx.fillRect(x + TILE / 2 - 3, y + 2, 6, TILE - 4);
+          ctx.fillRect(x + 8, y + 3, 4, TILE - 6);
+          ctx.beginPath();
+          ctx.moveTo(x + 12, y + 5);
+          ctx.lineTo(x + TILE - 4, y + 11);
+          ctx.lineTo(x + 12, y + 17);
+          ctx.closePath();
+          ctx.fill();
         }
       }
     }
