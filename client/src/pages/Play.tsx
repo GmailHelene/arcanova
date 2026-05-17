@@ -12,6 +12,8 @@ interface GameDetail {
   creator: string;
   plays: number;
   definition: unknown;
+  like_count: number;
+  liked_by_me: boolean;
 }
 
 interface ScoreRow {
@@ -25,6 +27,8 @@ export default function Play() {
   const [game, setGame] = useState<GameDetail | null>(null);
   const [level, setLevel] = useState<Level | null>(null);
   const [scores, setScores] = useState<ScoreRow[]>([]);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [note, setNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,10 +43,40 @@ export default function Play() {
       .then((res) => {
         setGame(res.game);
         setLevel(normalizeLevel(res.game.definition));
+        setLiked(res.game.liked_by_me);
+        setLikeCount(res.game.like_count);
       })
       .catch((e) => setError(e.message));
     loadScores();
   }, [id, loadScores]);
+
+  async function toggleLike() {
+    if (!user) {
+      setNote("Sign in to like worlds.");
+      return;
+    }
+    const next = !liked;
+    setLiked(next);
+    setLikeCount((c) => c + (next ? 1 : -1));
+    try {
+      await api(`/games/${id}/like`, { method: next ? "POST" : "DELETE" });
+    } catch (e: any) {
+      // Roll back on failure.
+      setLiked(!next);
+      setLikeCount((c) => c + (next ? -1 : 1));
+      setNote(e.message);
+    }
+  }
+
+  async function share() {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      setNote("Link copied — share it so others can play this world.");
+    } catch {
+      setNote(url);
+    }
+  }
 
   const onWin = useCallback(
     async (score: number) => {
@@ -76,6 +110,18 @@ export default function Play() {
       <h1>{game.title}</h1>
       <p className="muted">by {game.creator} · {game.plays} plays</p>
       {game.description && <p>{game.description}</p>}
+
+      <div className="play-actions">
+        <button
+          className={`btn-ghost ${liked ? "liked" : ""}`}
+          onClick={toggleLike}
+        >
+          {liked ? "♥" : "♡"} {likeCount}
+        </button>
+        <button className="btn-ghost" onClick={share}>
+          Share
+        </button>
+      </div>
 
       {isEmpty ? (
         <div className="stage placeholder">

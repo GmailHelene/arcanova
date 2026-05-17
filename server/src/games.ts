@@ -1,19 +1,31 @@
 import { Router, Request, Response } from "express";
 import { query } from "./db";
-import { authMiddleware, AuthedRequest } from "./auth";
+import { authMiddleware, optionalAuth, AuthedRequest } from "./auth";
 
 export const gamesRouter = Router();
 
-// List published games for the Discover page.
-gamesRouter.get("/", async (_req: Request, res: Response) => {
+// List published games for the Discover page, with search and sorting.
+gamesRouter.get("/", optionalAuth, async (req: AuthedRequest, res: Response) => {
+  const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+  const sort = req.query.sort;
+  const orderBy =
+    sort === "plays" ? "g.plays DESC" :
+    sort === "likes" ? "like_count DESC" :
+    "g.created_at DESC";
   const result = await query(
-    `SELECT g.id, g.title, g.description, g.plays, g.created_at,
-            u.display_name AS creator
+    `SELECT g.id, g.title, g.description, g.plays, g.created_at, g.creator_id,
+            u.display_name AS creator,
+            COUNT(DISTINCT l.user_id)::int AS like_count,
+            COALESCE(BOOL_OR(l.user_id = $2), false) AS liked_by_me
        FROM games g
        JOIN users u ON u.id = g.creator_id
+       LEFT JOIN likes l ON l.game_id = g.id
       WHERE g.published = true
-      ORDER BY g.created_at DESC
-      LIMIT 50`
+        AND ($1 = '' OR g.title ILIKE '%' || $1 || '%')
+      GROUP BY g.id, u.display_name
+      ORDER BY ${orderBy}
+      LIMIT 60`,
+    [search, req.userId ?? 0]
   );
   res.json({ games: result.rows });
 });
@@ -29,14 +41,18 @@ gamesRouter.get("/mine", authMiddleware, async (req: AuthedRequest, res: Respons
 });
 
 // A single game with its full definition (used by the play runtime).
-gamesRouter.get("/:id", async (req: Request, res: Response) => {
+gamesRouter.get("/:id", optionalAuth, async (req: AuthedRequest, res: Response) => {
   const result = await query(
     `SELECT g.id, g.title, g.description, g.definition, g.plays, g.published,
-            g.creator_id, u.display_name AS creator
+            g.creator_id, u.display_name AS creator,
+            COUNT(DISTINCT l.user_id)::int AS like_count,
+            COALESCE(BOOL_OR(l.user_id = $2), false) AS liked_by_me
        FROM games g
        JOIN users u ON u.id = g.creator_id
-      WHERE g.id = $1`,
-    [req.params.id]
+       LEFT JOIN likes l ON l.game_id = g.id
+      WHERE g.id = $1
+      GROUP BY g.id, u.display_name`,
+    [req.params.id, req.userId ?? 0]
   );
   if (!result.rows[0]) return res.status(404).json({ error: "Game not found" });
   res.json({ game: result.rows[0] });
@@ -98,6 +114,25 @@ gamesRouter.post("/:id/scores", authMiddleware, async (req: AuthedRequest, res: 
   );
   await query(`UPDATE games SET plays = plays + 1 WHERE id = $1`, [req.params.id]);
   res.status(201).json({ ok: true });
+});
+
+// Like a game.
+gamesRouter.post("/:id/like", authMiddleware, async (req: AuthedRequest, res: Response) => {
+  await query(
+    `INSERT INTO likes (game_id, user_id) VALUES ($1, $2)
+     ON CONFLICT DO NOTHING`,
+    [req.params.id, req.userId]
+  );
+  res.json({ ok: true });
+});
+
+// Remove a like.
+gamesRouter.delete("/:id/like", authMiddleware, async (req: AuthedRequest, res: Response) => {
+  await query(
+    `DELETE FROM likes WHERE game_id = $1 AND user_id = $2`,
+    [req.params.id, req.userId]
+  );
+  res.json({ ok: true });
 });
 
 // Top scores for a game.

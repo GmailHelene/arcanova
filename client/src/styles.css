@@ -232,6 +232,14 @@ select:focus { outline: none; border-color: var(--accent); }
 }
 .ok-msg { color: var(--accent-2); font-size: 14px; }
 
+/* ---- Discover & Play extras ---- */
+.discover-bar {
+  display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap;
+}
+.discover-bar input { flex: 1; min-width: 180px; }
+.play-actions { display: flex; gap: 10px; margin: 12px 0; }
+.btn-ghost.liked { border-color: var(--error); color: var(--error); }
+
 /* ---- Leaderboard ---- */
 .leaderboard {
   list-style: none; counter-reset: rank;

@@ -26,6 +26,21 @@ export function authMiddleware(req: AuthedRequest, res: Response, next: NextFunc
   }
 }
 
+// Like authMiddleware, but never rejects — just sets userId when a valid
+// token is present. Used by public endpoints that personalize when signed in.
+export function optionalAuth(req: AuthedRequest, _res: Response, next: NextFunction) {
+  const header = req.headers.authorization;
+  if (header && header.startsWith("Bearer ")) {
+    try {
+      const payload = jwt.verify(header.slice(7), JWT_SECRET) as { userId: number };
+      req.userId = payload.userId;
+    } catch {
+      // Ignore an invalid token on a public route.
+    }
+  }
+  next();
+}
+
 function publicUser(row: any) {
   return {
     id: row.id,

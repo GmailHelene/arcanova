@@ -29,6 +29,14 @@ CREATE TABLE IF NOT EXISTS scores (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS likes (
+  game_id    INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (game_id, user_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_games_published ON games(published);
 CREATE INDEX IF NOT EXISTS idx_scores_game ON scores(game_id, score DESC);
+CREATE INDEX IF NOT EXISTS idx_likes_game ON likes(game_id);
 `;
