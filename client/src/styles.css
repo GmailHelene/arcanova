@@ -108,6 +108,15 @@ p { line-height: 1.55; }
   font-size: 34px; color: var(--gold);
 }
 .card-meta { color: var(--muted); font-size: 12px; }
+.card-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; margin-top: 2px;
+}
+.btn-danger {
+  background: none; border: 1px solid var(--error); color: var(--error);
+  padding: 4px 10px; border-radius: 7px; font-size: 12px; cursor: pointer;
+}
+.btn-danger:hover { background: var(--error); color: #0c0a14; }
 
 /* ---- Panels & forms ---- */
 .panel {

@@ -37,6 +37,17 @@ export default function Create() {
     }
   }
 
+  async function deleteGame(game: MyGame) {
+    if (!window.confirm(`Delete "${game.title}"? This cannot be undone.`)) return;
+    setError(null);
+    try {
+      await api(`/games/${game.id}`, { method: "DELETE" });
+      setGames((prev) => prev.filter((g) => g.id !== game.id));
+    } catch (e: any) {
+      setError(e.message);
+    }
+  }
+
   if (!user) {
     return (
       <div className="panel">
@@ -70,7 +81,19 @@ export default function Create() {
             <span className="card-meta">
               {g.published ? "Published" : "Draft"} · {g.plays} plays
             </span>
-            <span className="card-meta">Open editor →</span>
+            <div className="card-row">
+              <span className="card-meta">Open editor →</span>
+              <button
+                className="btn-danger"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  deleteGame(g);
+                }}
+              >
+                Delete
+              </button>
+            </div>
           </Link>
         ))}
         {games.length === 0 && (

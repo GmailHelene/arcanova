@@ -47,13 +47,20 @@ opening the next.
 - Age-appropriate account handling
 - Reporting and review tools
 
-### Phase 5 — Beyond ⬜ Ideas, not committed
+### Phase 5 — Online & multiplayer ⬜ Planned — core goal
+- Real-time multiplayer: several players in the same world at once
+- Live presence — see other players move around in real time
+- Co-op and competitive play inside shared worlds
+- Built on persistent websocket connections (a key reason the stack runs on
+  Railway rather than a serverless host)
+
+### Phase 6 — Beyond ⬜ Ideas, not committed
 - More world types (top-down arena, maze/quest)
-- Real-time / multiplayer
 - Creator recognition and events
 
 ## Changelog
 
+- **2026-05-18** — Creators can delete their own worlds.
 - **2026-05-18** — Phase 2: world themes (6 themes — sky + ground styling).
 - **2026-05-18** — Phase 2: moving platforms (horizontal + vertical).
 - **2026-05-18** — Phase 2 started: bouncer + one-way platform tiles, sound effects.

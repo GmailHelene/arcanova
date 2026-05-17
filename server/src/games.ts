@@ -77,6 +77,17 @@ gamesRouter.put("/:id", authMiddleware, async (req: AuthedRequest, res: Response
   res.json({ game: result.rows[0] });
 });
 
+// Delete a game. Only the creator may do this. Scores cascade automatically.
+gamesRouter.delete("/:id", authMiddleware, async (req: AuthedRequest, res: Response) => {
+  const owned = await query(`SELECT creator_id FROM games WHERE id = $1`, [req.params.id]);
+  if (!owned.rows[0]) return res.status(404).json({ error: "Game not found" });
+  if (owned.rows[0].creator_id !== req.userId) {
+    return res.status(403).json({ error: "This is not your game" });
+  }
+  await query(`DELETE FROM games WHERE id = $1`, [req.params.id]);
+  res.json({ ok: true });
+});
+
 // Record a score for a game's leaderboard.
 gamesRouter.post("/:id/scores", authMiddleware, async (req: AuthedRequest, res: Response) => {
   const score = Number(req.body?.score);
