@@ -33,9 +33,14 @@ export default function Runtime({ level, onWin }: Props) {
     const ctx = canvas.getContext("2d")!;
     const cols = level.cols;
     const rows = level.rows;
-    canvas.width = cols * TILE;
-    canvas.height = rows * TILE;
+    // The canvas is a scrolling viewport — narrower than a wide level.
+    const VIEW_COLS = 30;
+    const viewW = Math.min(VIEW_COLS, cols) * TILE;
+    const viewH = rows * TILE;
+    canvas.width = viewW;
+    canvas.height = viewH;
     const theme = getTheme(level.theme);
+    let camX = 0;
 
     const tiles = level.tiles.slice(); // mutable copy so coins can be removed
 
@@ -284,12 +289,19 @@ export default function Runtime({ level, onWin }: Props) {
     }
 
     function draw() {
-      // Sky.
-      const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      // Camera follows the player, clamped to the level bounds.
+      camX = player.x + PW / 2 - viewW / 2;
+      camX = Math.max(0, Math.min(camX, cols * TILE - viewW));
+
+      // Sky fills the viewport — drawn before the camera transform.
+      const sky = ctx.createLinearGradient(0, 0, 0, viewH);
       sky.addColorStop(0, theme.skyTop);
       sky.addColorStop(1, theme.skyBottom);
       ctx.fillStyle = sky;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, viewW, viewH);
+
+      ctx.save();
+      ctx.translate(-Math.round(camX), 0);
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
@@ -352,7 +364,9 @@ export default function Runtime({ level, onWin }: Props) {
       const eye = player.face > 0 ? player.x + PW - 9 : player.x + 4;
       ctx.fillRect(eye, player.y + 7, 5, 5);
 
-      // HUD.
+      ctx.restore();
+
+      // HUD — drawn in screen space, not affected by the camera.
       ctx.fillStyle = "rgba(12,10,26,0.7)";
       ctx.fillRect(8, 8, 250, 30);
       ctx.fillStyle = "#e9e7f5";

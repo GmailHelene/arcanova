@@ -262,19 +262,24 @@ export default function Editor() {
             </button>
           </div>
 
-          <canvas
-            ref={canvasRef}
-            className="game-canvas editor-canvas"
-            onPointerDown={(e) => {
-              painting.current = true;
-              paint(e);
-            }}
-            onPointerMove={(e) => {
-              if (painting.current) paint(e);
-            }}
-            onPointerUp={() => (painting.current = false)}
-            onPointerLeave={() => (painting.current = false)}
-          />
+          <div className="editor-scroll">
+            <canvas
+              ref={canvasRef}
+              className="editor-canvas"
+              onPointerDown={(e) => {
+                painting.current = true;
+                paint(e);
+              }}
+              onPointerMove={(e) => {
+                if (painting.current) paint(e);
+              }}
+              onPointerUp={() => (painting.current = false)}
+              onPointerLeave={() => (painting.current = false)}
+            />
+          </div>
+          <p className="muted controls-hint">
+            Scroll sideways to build across the whole level.
+          </p>
 
           <div className="editor-actions">
             <button className="btn" onClick={() => setTesting(true)}>

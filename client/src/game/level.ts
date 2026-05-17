@@ -1,7 +1,7 @@
 // Shared 2D platformer level format.
 // A level's `definition` (stored as JSONB on the game row) is a Level object.
 
-export const COLS = 40;
+export const COLS = 90; // levels are wider than the screen; the camera scrolls
 export const ROWS = 18;
 export const TILE = 32;
 
@@ -85,17 +85,27 @@ export function createEmptyLevel(): Level {
 }
 
 // Returns a valid Level whether the stored definition is empty, partial or full.
+// A level keeps its own stored cols/rows, so levels saved at an earlier size
+// (e.g. the original 40-wide grid) keep working as the default size grows.
 export function normalizeLevel(def: unknown): Level {
   const d = def as Partial<Level> | null | undefined;
-  if (!d || !Array.isArray(d.tiles) || d.tiles.length !== COLS * ROWS) {
-    return createEmptyLevel();
+  if (
+    d &&
+    Array.isArray(d.tiles) &&
+    typeof d.cols === "number" &&
+    typeof d.rows === "number" &&
+    d.cols > 0 &&
+    d.rows > 0 &&
+    d.tiles.length === d.cols * d.rows
+  ) {
+    return {
+      version: 1,
+      cols: d.cols,
+      rows: d.rows,
+      tiles: d.tiles.map((t) => Number(t) || 0),
+      spawn: d.spawn ?? { col: 2, row: d.rows - 2 },
+      theme: typeof d.theme === "string" ? d.theme : DEFAULT_THEME,
+    };
   }
-  return {
-    version: 1,
-    cols: COLS,
-    rows: ROWS,
-    tiles: d.tiles.map((t) => Number(t) || 0),
-    spawn: d.spawn ?? { col: 2, row: ROWS - 2 },
-    theme: typeof d.theme === "string" ? d.theme : DEFAULT_THEME,
-  };
+  return createEmptyLevel();
 }

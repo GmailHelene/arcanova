@@ -162,7 +162,14 @@ input:focus { outline: none; border-color: var(--accent); }
   background: #181433; margin-top: 12px;
   image-rendering: pixelated;
 }
-.editor-canvas { cursor: crosshair; touch-action: none; }
+.editor-scroll {
+  overflow-x: auto; margin-top: 12px;
+  border: 1px solid var(--border); border-radius: 12px;
+}
+.editor-canvas {
+  display: block; background: #181433;
+  cursor: crosshair; touch-action: none;
+}
 .runtime { position: relative; }
 .controls-hint { text-align: center; margin-top: 10px; font-size: 13px; }
 .win-overlay {

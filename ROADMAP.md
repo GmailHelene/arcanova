@@ -37,7 +37,7 @@ opening the next.
 - ✅ Sound effects (jump, coin, bounce, death, win)
 - ✅ Moving platforms (horizontal + vertical)
 - ✅ World themes (Twilight, Jungle, Space, Cave, Snow, Lava)
-- ⬜ Bigger or scrollable levels
+- ✅ Bigger, scrolling levels (camera follows the player)
 - ⬜ Background music
 
 ### Phase 3 — Discovery & social ⬜ Planned
@@ -64,6 +64,7 @@ opening the next.
 
 ## Changelog
 
+- **2026-05-18** — Phase 2: wider levels (90 tiles) with a scrolling camera.
 - **2026-05-18** — Creators can delete their own worlds.
 - **2026-05-18** — Phase 2: world themes (6 themes — sky + ground styling).
 - **2026-05-18** — Phase 2: moving platforms (horizontal + vertical).
