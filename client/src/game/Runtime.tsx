@@ -25,9 +25,15 @@ interface Props {
 // up / W / space to jump.
 export default function Runtime({ level, onWin }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const touchRef = useRef({ left: false, right: false, jump: false });
   const [runId, setRunId] = useState(0);
   const [won, setWon] = useState<{ score: number } | null>(null);
   const [musicOn, setMusicOn] = useState(true);
+  const [isTouch] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(pointer: coarse)").matches === true
+  );
 
   // Background music runs while enabled, independent of the game loop.
   useEffect(() => {
@@ -142,9 +148,10 @@ export default function Runtime({ level, onWin }: Props) {
       }
       ridingMover = null;
 
-      const left = keys["arrowleft"] || keys["a"];
-      const right = keys["arrowright"] || keys["d"];
-      const jump = keys["arrowup"] || keys["w"] || keys[" "];
+      const t = touchRef.current;
+      const left = keys["arrowleft"] || keys["a"] || t.left;
+      const right = keys["arrowright"] || keys["d"] || t.right;
+      const jump = keys["arrowup"] || keys["w"] || keys[" "] || t.jump;
 
       player.vx = (right ? 3.4 : 0) - (left ? 3.4 : 0);
       if (player.vx !== 0) player.face = player.vx > 0 ? 1 : -1;
@@ -406,9 +413,46 @@ export default function Runtime({ level, onWin }: Props) {
     setRunId((n) => n + 1);
   }
 
+  function hold(key: "left" | "right" | "jump", value: boolean) {
+    touchRef.current[key] = value;
+  }
+
   return (
     <div className="runtime">
       <canvas ref={canvasRef} className="game-canvas" />
+      {isTouch && !won && (
+        <div className="touch-controls">
+          <div className="touch-pad">
+            <button
+              className="touch-btn"
+              onPointerDown={() => hold("left", true)}
+              onPointerUp={() => hold("left", false)}
+              onPointerLeave={() => hold("left", false)}
+              onPointerCancel={() => hold("left", false)}
+            >
+              ◀
+            </button>
+            <button
+              className="touch-btn"
+              onPointerDown={() => hold("right", true)}
+              onPointerUp={() => hold("right", false)}
+              onPointerLeave={() => hold("right", false)}
+              onPointerCancel={() => hold("right", false)}
+            >
+              ▶
+            </button>
+          </div>
+          <button
+            className="touch-btn touch-jump"
+            onPointerDown={() => hold("jump", true)}
+            onPointerUp={() => hold("jump", false)}
+            onPointerLeave={() => hold("jump", false)}
+            onPointerCancel={() => hold("jump", false)}
+          >
+            ▲
+          </button>
+        </div>
+      )}
       {won && (
         <div className="win-overlay">
           <h2>Level complete!</h2>
@@ -418,7 +462,9 @@ export default function Runtime({ level, onWin }: Props) {
       )}
       <div className="runtime-footer">
         <span className="muted controls-hint">
-          Move: arrows or A / D · Jump: up, W or space
+          {isTouch
+            ? "Use the on-screen buttons to move and jump."
+            : "Move: arrows or A / D · Jump: up, W or space"}
         </span>
         <button
           className="btn-ghost"

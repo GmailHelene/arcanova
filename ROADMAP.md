@@ -32,15 +32,14 @@ opening the next.
 - Per-world leaderboards
 - Full keyboard control
 
-### Phase 2 — A richer platformer 🔄 In progress
+### Phase 2 — A richer platformer ✅ Done
 - ✅ Bouncer and one-way platform tiles
 - ✅ Sound effects (jump, coin, bounce, death, win)
 - ✅ Moving platforms (horizontal + vertical)
 - ✅ World themes (Twilight, Jungle, Space, Cave, Snow, Lava)
 - ✅ Bigger, scrolling levels (camera follows the player)
 - ✅ Background music (with an on/off toggle)
-- ⬜ Mobile / touch controls — the game is keyboard-only today, so it is
-  not yet playable on phones or tablets
+- ✅ Mobile / touch controls — on-screen move/jump buttons on touch devices
 
 ### Phase 3 — Discovery & social ⬜ Planned
 - Better Discover page: search, sort, featured worlds
@@ -66,6 +65,7 @@ opening the next.
 
 ## Changelog
 
+- **2026-05-18** — Phase 2 complete: on-screen touch controls for mobile.
 - **2026-05-18** — Phase 2: background music with an on/off toggle.
 - **2026-05-18** — Phase 2: wider levels (90 tiles) with a scrolling camera.
 - **2026-05-18** — Creators can delete their own worlds.
