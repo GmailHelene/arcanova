@@ -36,7 +36,21 @@ CREATE TABLE IF NOT EXISTS likes (
   PRIMARY KEY (game_id, user_id)
 );
 
+-- Moderation: admin flag, hidden worlds, and a report queue.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE games ADD COLUMN IF NOT EXISTS hidden BOOLEAN NOT NULL DEFAULT false;
+
+CREATE TABLE IF NOT EXISTS reports (
+  id          SERIAL PRIMARY KEY,
+  game_id     INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+  reporter_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reason      TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'open',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE INDEX IF NOT EXISTS idx_games_published ON games(published);
 CREATE INDEX IF NOT EXISTS idx_scores_game ON scores(game_id, score DESC);
 CREATE INDEX IF NOT EXISTS idx_likes_game ON likes(game_id);
+CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status);
 `;

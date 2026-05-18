@@ -21,7 +21,7 @@ usersRouter.get("/:id", async (req: Request, res: Response) => {
             COUNT(DISTINCT l.user_id)::int AS like_count
        FROM games g
        LEFT JOIN likes l ON l.game_id = g.id
-      WHERE g.creator_id = $1 AND g.published = true
+      WHERE g.creator_id = $1 AND g.published = true AND g.hidden = false
       GROUP BY g.id
       ORDER BY g.created_at DESC`,
     [userId]

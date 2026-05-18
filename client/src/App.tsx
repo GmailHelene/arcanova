@@ -6,6 +6,7 @@ import Create from "./pages/Create";
 import Editor from "./pages/Editor";
 import Profile from "./pages/Profile";
 import UserProfile from "./pages/UserProfile";
+import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
           <NavLink to="/" end>Discover</NavLink>
           <NavLink to="/create">Create</NavLink>
           {user && <NavLink to="/profile">Profile</NavLink>}
+          {user?.isAdmin && <NavLink to="/admin">Admin</NavLink>}
         </nav>
         <div className="account">
           {user ? (
@@ -42,6 +44,7 @@ export default function App() {
           <Route path="/edit/:id" element={<Editor />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/user/:id" element={<UserProfile />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/login" element={<Login />} />
         </Routes>
       </main>

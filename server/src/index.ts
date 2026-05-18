@@ -7,6 +7,7 @@ import { initSchema } from "./db";
 import { authRouter } from "./auth";
 import { gamesRouter } from "./games";
 import { usersRouter } from "./users";
+import { adminRouter } from "./admin";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
@@ -18,6 +19,7 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok", service: "arcanov
 app.use("/api/auth", authRouter);
 app.use("/api/games", gamesRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/admin", adminRouter);
 
 // Serve the built React client in production.
 const clientDist = path.join(__dirname, "../../client/dist");

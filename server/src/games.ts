@@ -21,6 +21,7 @@ gamesRouter.get("/", optionalAuth, async (req: AuthedRequest, res: Response) => 
        JOIN users u ON u.id = g.creator_id
        LEFT JOIN likes l ON l.game_id = g.id
       WHERE g.published = true
+        AND g.hidden = false
         AND ($1 = '' OR g.title ILIKE '%' || $1 || '%')
       GROUP BY g.id, u.display_name
       ORDER BY ${orderBy}
@@ -50,7 +51,7 @@ gamesRouter.get("/featured", async (_req: Request, res: Response) => {
        FROM games g
        JOIN users u ON u.id = g.creator_id
        JOIN likes l ON l.game_id = g.id
-      WHERE g.published = true
+      WHERE g.published = true AND g.hidden = false
       GROUP BY g.id, u.display_name
       ORDER BY like_count DESC, g.plays DESC
       LIMIT 3`
@@ -62,7 +63,7 @@ gamesRouter.get("/featured", async (_req: Request, res: Response) => {
 gamesRouter.get("/:id", optionalAuth, async (req: AuthedRequest, res: Response) => {
   const result = await query(
     `SELECT g.id, g.title, g.description, g.definition, g.plays, g.published,
-            g.creator_id, u.display_name AS creator,
+            g.hidden, g.creator_id, u.display_name AS creator,
             COUNT(DISTINCT l.user_id)::int AS like_count,
             COALESCE(BOOL_OR(l.user_id = $2), false) AS liked_by_me
        FROM games g
@@ -151,6 +152,19 @@ gamesRouter.delete("/:id/like", authMiddleware, async (req: AuthedRequest, res: 
     [req.params.id, req.userId]
   );
   res.json({ ok: true });
+});
+
+// Report a world for an admin to review.
+gamesRouter.post("/:id/report", authMiddleware, async (req: AuthedRequest, res: Response) => {
+  const reason =
+    typeof req.body?.reason === "string" ? req.body.reason.slice(0, 500) : "";
+  const exists = await query(`SELECT id FROM games WHERE id = $1`, [req.params.id]);
+  if (!exists.rows[0]) return res.status(404).json({ error: "Game not found" });
+  await query(
+    `INSERT INTO reports (game_id, reporter_id, reason) VALUES ($1, $2, $3)`,
+    [req.params.id, req.userId, reason]
+  );
+  res.status(201).json({ ok: true });
 });
 
 // Top scores for a game.

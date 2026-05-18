@@ -15,6 +15,7 @@ interface GameDetail {
   creator_id: number;
   like_count: number;
   liked_by_me: boolean;
+  hidden: boolean;
 }
 
 interface ScoreRow {
@@ -65,6 +66,21 @@ export default function Play() {
       // Roll back on failure.
       setLiked(!next);
       setLikeCount((c) => c + (next ? -1 : 1));
+      setNote(e.message);
+    }
+  }
+
+  async function report() {
+    if (!user) {
+      setNote("Sign in to report a world.");
+      return;
+    }
+    const reason = window.prompt("Why are you reporting this world?");
+    if (reason === null) return;
+    try {
+      await api(`/games/${id}/report`, { method: "POST", body: { reason } });
+      setNote("Thanks — this world has been reported for review.");
+    } catch (e: any) {
       setNote(e.message);
     }
   }
@@ -128,9 +144,16 @@ export default function Play() {
         <button className="btn-ghost" onClick={share}>
           Share
         </button>
+        <button className="btn-ghost" onClick={report}>
+          Report
+        </button>
       </div>
 
-      {isEmpty ? (
+      {game.hidden ? (
+        <div className="stage placeholder">
+          <span>This world is unavailable.</span>
+        </div>
+      ) : isEmpty ? (
         <div className="stage placeholder">
           <span>This world is still being built — check back soon.</span>
         </div>
