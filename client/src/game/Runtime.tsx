@@ -18,8 +18,10 @@ import { sfx, music } from "./sound";
 interface Peer {
   name: string;
   color: string;
-  x: number;
+  x: number; // rendered position, smoothed toward the target
   y: number;
+  tx: number; // latest position received from the server
+  ty: number;
   face: number;
 }
 
@@ -75,14 +77,17 @@ export default function Runtime({ level, onWin, gameId, playerName }: Props) {
       }
       if (msg.t === "welcome") {
         peers.clear();
-        for (const p of msg.peers) peers.set(p.id, p);
+        for (const p of msg.peers) {
+          peers.set(p.id, { ...p, tx: p.x, ty: p.y });
+        }
       } else if (msg.t === "joined") {
-        peers.set(msg.peer.id, msg.peer);
+        const p = msg.peer;
+        peers.set(p.id, { ...p, tx: p.x, ty: p.y });
       } else if (msg.t === "pos") {
         const p = peers.get(msg.id);
         if (p) {
-          p.x = msg.x;
-          p.y = msg.y;
+          p.tx = msg.x;
+          p.ty = msg.y;
           p.face = msg.face;
         }
       } else if (msg.t === "left") {
@@ -442,8 +447,11 @@ export default function Runtime({ level, onWin, gameId, playerName }: Props) {
         ctx.fillRect(m.x, m.y + 5, TILE, 5);
       }
 
-      // Other players (live presence).
+      // Other players (live presence) — the rendered position eases toward
+      // the latest target so movement looks fluid between network updates.
       for (const peer of peersRef.current.values()) {
+        peer.x += (peer.tx - peer.x) * 0.25;
+        peer.y += (peer.ty - peer.y) * 0.25;
         ctx.globalAlpha = 0.8;
         ctx.fillStyle = peer.color;
         ctx.fillRect(peer.x, peer.y, PW, PH);

@@ -62,7 +62,7 @@ payouts. That kept this phase small and buildable:
 Built on persistent websocket connections (a key reason the stack runs on
 Railway rather than a serverless host).
 - ✅ Live presence — players in the same world see each other move in real time
-- ⬜ Smoother peer movement (position interpolation)
+- ✅ Smoother peer movement (position interpolation)
 - ⬜ Co-op mechanics (shared buttons, shared goals)
 - ⬜ Competitive netcode + server-authoritative anti-cheat
 
@@ -94,6 +94,7 @@ Decided against:
 
 ## Changelog
 
+- **2026-05-18** — Phase 5: peer positions interpolated for smooth movement.
 - **2026-05-18** — Phase 5.1: live presence — a WebSocket server lets
   players in the same world see each other move in real time.
 - **2026-05-18** — Auth moved to an httpOnly SameSite=Strict cookie
