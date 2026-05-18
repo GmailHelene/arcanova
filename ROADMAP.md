@@ -41,12 +41,13 @@ opening the next.
 - ✅ Background music (with an on/off toggle)
 - ✅ Mobile / touch controls — on-screen move/jump buttons on touch devices
 
-### Phase 3 — Discovery & social 🔄 In progress
+### Phase 3 — Discovery & social ✅ Done
 - ✅ Likes / favourites
 - ✅ Discover page: search + sort (newest, most played, most liked)
 - ✅ Share links for individual worlds
 - ✅ Player profiles showing their published worlds
-- ⬜ Featured worlds
+- ✅ Featured worlds (currently the most-liked worlds; hand-curated
+  featuring will come once admin tooling exists in Phase 4)
 
 ### Phase 4 — Safety & trust ⬜ Planned
 - Content moderation for published worlds and usernames
@@ -66,6 +67,7 @@ opening the next.
 
 ## Changelog
 
+- **2026-05-18** — Phase 3 complete: featured worlds on Discover.
 - **2026-05-18** — Phase 3: public player profiles.
 - **2026-05-18** — Phase 3 started: likes, Discover search + sort, share links.
 - **2026-05-18** — Phase 2 complete: on-screen touch controls for mobile.

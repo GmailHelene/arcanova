@@ -40,6 +40,24 @@ gamesRouter.get("/mine", authMiddleware, async (req: AuthedRequest, res: Respons
   res.json({ games: result.rows });
 });
 
+// Featured worlds for the top of the Discover page — the most-liked worlds.
+// Defined before "/:id" so the path is not captured as a game id.
+gamesRouter.get("/featured", async (_req: Request, res: Response) => {
+  const result = await query(
+    `SELECT g.id, g.title, g.description, g.plays, g.creator_id,
+            u.display_name AS creator,
+            COUNT(DISTINCT l.user_id)::int AS like_count
+       FROM games g
+       JOIN users u ON u.id = g.creator_id
+       JOIN likes l ON l.game_id = g.id
+      WHERE g.published = true
+      GROUP BY g.id, u.display_name
+      ORDER BY like_count DESC, g.plays DESC
+      LIMIT 3`
+  );
+  res.json({ games: result.rows });
+});
+
 // A single game with its full definition (used by the play runtime).
 gamesRouter.get("/:id", optionalAuth, async (req: AuthedRequest, res: Response) => {
   const result = await query(

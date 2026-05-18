@@ -13,12 +13,33 @@ interface GameCard {
 
 type Sort = "new" | "plays" | "likes";
 
+function WorldCard({ g }: { g: GameCard }) {
+  return (
+    <Link to={`/play/${g.id}`} className="card">
+      <div className="card-art">✦</div>
+      <h3>{g.title}</h3>
+      <p className="muted">{g.description || "An Arcanova world."}</p>
+      <span className="card-meta">
+        by {g.creator} · {g.plays} plays · ♥ {g.like_count}
+      </span>
+    </Link>
+  );
+}
+
 export default function Discover() {
   const [games, setGames] = useState<GameCard[]>([]);
+  const [featured, setFeatured] = useState<GameCard[]>([]);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<Sort>("new");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Featured worlds load once.
+  useEffect(() => {
+    api<{ games: GameCard[] }>("/games/featured")
+      .then((res) => setFeatured(res.games))
+      .catch(() => {});
+  }, []);
 
   // Refetch when search or sort changes (search is debounced).
   useEffect(() => {
@@ -42,6 +63,17 @@ export default function Discover() {
         <p>Explore worlds built by players around the globe — or build your own.</p>
         <Link to="/create" className="btn btn-lg">Start creating</Link>
       </section>
+
+      {featured.length > 0 && (
+        <section className="featured-section">
+          <h2>✦ Featured worlds</h2>
+          <div className="grid">
+            {featured.map((g) => (
+              <WorldCard key={g.id} g={g} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="discover-bar">
         <input
@@ -68,14 +100,7 @@ export default function Discover() {
       )}
       <div className="grid">
         {games.map((g) => (
-          <Link key={g.id} to={`/play/${g.id}`} className="card">
-            <div className="card-art">✦</div>
-            <h3>{g.title}</h3>
-            <p className="muted">{g.description || "An Arcanova world."}</p>
-            <span className="card-meta">
-              by {g.creator} · {g.plays} plays · ♥ {g.like_count}
-            </span>
-          </Link>
+          <WorldCard key={g.id} g={g} />
         ))}
       </div>
     </div>
