@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { SCHEMA_SQL } from "./schema";
+import { MIGRATIONS } from "./migrations";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -18,7 +18,37 @@ export function query(text: string, params?: unknown[]) {
   return pool.query(text, params as unknown[]);
 }
 
-export async function initSchema() {
-  await pool.query(SCHEMA_SQL);
-  console.log("Database schema is ready.");
+// Applies any migrations that have not run yet. Each runs once, inside a
+// transaction, and is recorded in schema_migrations.
+export async function runMigrations() {
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS schema_migrations (
+       name       TEXT PRIMARY KEY,
+       applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
+     )`,
+  );
+  const applied = await pool.query<{ name: string }>(
+    `SELECT name FROM schema_migrations`,
+  );
+  const done = new Set(applied.rows.map((r) => r.name));
+
+  for (const migration of MIGRATIONS) {
+    if (done.has(migration.name)) continue;
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query(migration.sql);
+      await client.query(`INSERT INTO schema_migrations (name) VALUES ($1)`, [
+        migration.name,
+      ]);
+      await client.query("COMMIT");
+      console.log(`Applied migration ${migration.name}`);
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+  console.log("Database is up to date.");
 }

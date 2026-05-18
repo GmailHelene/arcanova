@@ -79,9 +79,9 @@ Done:
 - Score submissions bounded — absurd / negative values are rejected
 - Linting + formatting (ESLint + Prettier)
 - Automated tests (Vitest) + CI that runs lint, tests and build on every push
+- Real DB migrations — ordered, transactional, tracked in schema_migrations
 
 Pending:
-- Real DB migrations — replace the ALTER-TABLE-on-startup approach
 - Auth via httpOnly cookies instead of localStorage (CSRF tradeoffs —
   needs a decision)
 - Email verification (needs an email provider; may not fit a young
@@ -91,6 +91,8 @@ Pending:
 
 ## Changelog
 
+- **2026-05-18** — DB migrations: ordered, transactional migration runner
+  (schema_migrations table) replaces apply-schema-on-startup.
 - **2026-05-18** — Tooling: ESLint + Prettier, Vitest test suite, GitHub
   Actions CI (lint + test + build).
 - **2026-05-18** — Hardening: auth rate-limiting, CORS restricted,

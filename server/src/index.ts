@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import express from "express";
 import cors from "cors";
-import { initSchema } from "./db";
+import { runMigrations } from "./db";
 import { authRouter } from "./auth";
 import { gamesRouter } from "./games";
 import { usersRouter } from "./users";
@@ -38,7 +38,7 @@ if (fs.existsSync(clientDist)) {
 }
 
 async function start() {
-  await initSchema();
+  await runMigrations();
   app.listen(PORT, () => console.log(`Arcanova server running on port ${PORT}`));
 }
 
