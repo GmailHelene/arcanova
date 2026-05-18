@@ -1,6 +1,7 @@
 import "dotenv/config";
 import path from "path";
 import fs from "fs";
+import http from "http";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -9,6 +10,7 @@ import { authRouter } from "./auth";
 import { gamesRouter } from "./games";
 import { usersRouter } from "./users";
 import { adminRouter } from "./admin";
+import { attachPresence } from "./presence";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
@@ -41,7 +43,11 @@ if (fs.existsSync(clientDist)) {
 
 async function start() {
   await runMigrations();
-  app.listen(PORT, () => console.log(`Arcanova server running on port ${PORT}`));
+  const server = http.createServer(app);
+  attachPresence(server);
+  server.listen(PORT, () =>
+    console.log(`Arcanova server running on port ${PORT}`),
+  );
 }
 
 start().catch((err) => {

@@ -15,17 +15,30 @@ import {
 } from "./level";
 import { sfx, music } from "./sound";
 
+interface Peer {
+  name: string;
+  color: string;
+  x: number;
+  y: number;
+  face: number;
+}
+
 interface Props {
   level: Level;
   // Called once when the player reaches the goal.
   onWin?: (score: number) => void;
+  // When set, the runtime joins a live-presence room for this world.
+  gameId?: number;
+  playerName?: string;
 }
 
 // Plays a 2D platformer level. Full keyboard control: arrows or WASD to move,
 // up / W / space to jump.
-export default function Runtime({ level, onWin }: Props) {
+export default function Runtime({ level, onWin, gameId, playerName }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const touchRef = useRef({ left: false, right: false, jump: false });
+  const wsRef = useRef<WebSocket | null>(null);
+  const peersRef = useRef<Map<number, Peer>>(new Map());
   const [runId, setRunId] = useState(0);
   const [won, setWon] = useState<{ score: number } | null>(null);
   const [musicOn, setMusicOn] = useState(true);
@@ -41,6 +54,48 @@ export default function Runtime({ level, onWin }: Props) {
     music.start();
     return () => music.stop();
   }, [musicOn]);
+
+  // Live presence: connect to the world's room and track other players.
+  useEffect(() => {
+    if (!gameId) return;
+    const peers = peersRef.current;
+    const proto = location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${proto}://${location.host}/ws`);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ t: "join", gameId, name: playerName || "Guest" }));
+    };
+    ws.onmessage = (ev) => {
+      let msg: any;
+      try {
+        msg = JSON.parse(ev.data);
+      } catch {
+        return;
+      }
+      if (msg.t === "welcome") {
+        peers.clear();
+        for (const p of msg.peers) peers.set(p.id, p);
+      } else if (msg.t === "joined") {
+        peers.set(msg.peer.id, msg.peer);
+      } else if (msg.t === "pos") {
+        const p = peers.get(msg.id);
+        if (p) {
+          p.x = msg.x;
+          p.y = msg.y;
+          p.face = msg.face;
+        }
+      } else if (msg.t === "left") {
+        peers.delete(msg.id);
+      }
+    };
+
+    return () => {
+      wsRef.current = null;
+      peers.clear();
+      ws.close();
+    };
+  }, [gameId, playerName]);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -301,6 +356,21 @@ export default function Runtime({ level, onWin }: Props) {
           }
         }
       }
+
+      // Broadcast our position to peers in the room (throttled).
+      if (gameId && frames % 4 === 0) {
+        const ws = wsRef.current;
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(
+            JSON.stringify({
+              t: "pos",
+              x: Math.round(player.x),
+              y: Math.round(player.y),
+              face: player.face,
+            }),
+          );
+        }
+      }
     }
 
     function draw() {
@@ -372,6 +442,19 @@ export default function Runtime({ level, onWin }: Props) {
         ctx.fillRect(m.x, m.y + 5, TILE, 5);
       }
 
+      // Other players (live presence).
+      for (const peer of peersRef.current.values()) {
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = peer.color;
+        ctx.fillRect(peer.x, peer.y, PW, PH);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "#e9e7f5";
+        ctx.font = "11px Segoe UI, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(peer.name, peer.x + PW / 2, peer.y - 5);
+        ctx.textAlign = "left";
+      }
+
       // Player.
       ctx.fillStyle = "#8b6bff";
       ctx.fillRect(player.x, player.y, PW, PH);
@@ -382,15 +465,13 @@ export default function Runtime({ level, onWin }: Props) {
       ctx.restore();
 
       // HUD — drawn in screen space, not affected by the camera.
+      let hudText = `Coins ${coins}   Time ${Math.floor(frames / 60)}s   Deaths ${deaths}`;
+      if (gameId) hudText += `   Players ${peersRef.current.size + 1}`;
       ctx.fillStyle = "rgba(12,10,26,0.7)";
-      ctx.fillRect(8, 8, 250, 30);
+      ctx.fillRect(8, 8, gameId ? 360 : 250, 30);
       ctx.fillStyle = "#e9e7f5";
       ctx.font = "16px Segoe UI, sans-serif";
-      ctx.fillText(
-        `Coins ${coins}   Time ${Math.floor(frames / 60)}s   Deaths ${deaths}`,
-        16,
-        28,
-      );
+      ctx.fillText(hudText, 16, 28);
     }
 
     let raf = 0;
@@ -406,7 +487,7 @@ export default function Runtime({ level, onWin }: Props) {
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
     };
-  }, [level, runId, onWin]);
+  }, [level, runId, onWin, gameId]);
 
   function replay() {
     setWon(null);

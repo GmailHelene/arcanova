@@ -58,12 +58,13 @@ payouts. That kept this phase small and buildable:
 - ✅ Hide / unhide reported content
 - ✅ Preset-message + reaction system (replaces free-form chat)
 
-### Phase 5 — Online & multiplayer ⬜ Planned — core goal
-- Real-time multiplayer: several players in the same world at once
-- Live presence — see other players move around in real time
-- Co-op and competitive play inside shared worlds
-- Built on persistent websocket connections (a key reason the stack runs on
-  Railway rather than a serverless host)
+### Phase 5 — Online & multiplayer 🔄 In progress — core goal
+Built on persistent websocket connections (a key reason the stack runs on
+Railway rather than a serverless host).
+- ✅ Live presence — players in the same world see each other move in real time
+- ⬜ Smoother peer movement (position interpolation)
+- ⬜ Co-op mechanics (shared buttons, shared goals)
+- ⬜ Competitive netcode + server-authoritative anti-cheat
 
 ### Phase 6 — Beyond ⬜ Ideas, not committed
 - More world types (top-down arena, maze/quest)
@@ -93,6 +94,8 @@ Decided against:
 
 ## Changelog
 
+- **2026-05-18** — Phase 5.1: live presence — a WebSocket server lets
+  players in the same world see each other move in real time.
 - **2026-05-18** — Auth moved to an httpOnly SameSite=Strict cookie
   (was localStorage); added a logout endpoint.
 - **2026-05-18** — DB migrations: ordered, transactional migration runner
