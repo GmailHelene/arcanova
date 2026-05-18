@@ -3,7 +3,9 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import Runtime from "../game/Runtime";
+import ArenaRuntime from "../game/ArenaRuntime";
 import { Level, normalizeLevel } from "../game/level";
+import { Arena, normalizeArena, worldKind } from "../game/arena";
 
 interface GameDetail {
   id: number;
@@ -45,7 +47,8 @@ export default function Play() {
   const { id } = useParams();
   const { user } = useAuth();
   const [game, setGame] = useState<GameDetail | null>(null);
-  const [level, setLevel] = useState<Level | null>(null);
+  const [level, setLevel] = useState<Level | Arena | null>(null);
+  const [kind, setKind] = useState<"platformer" | "arena">("platformer");
   const [scores, setScores] = useState<ScoreRow[]>([]);
   const [reactions, setReactions] = useState<ReactionRow[]>([]);
   const [liked, setLiked] = useState(false);
@@ -69,7 +72,13 @@ export default function Play() {
     api<{ game: GameDetail }>(`/games/${id}`)
       .then((res) => {
         setGame(res.game);
-        setLevel(normalizeLevel(res.game.definition));
+        const k = worldKind(res.game.definition);
+        setKind(k);
+        setLevel(
+          k === "arena"
+            ? normalizeArena(res.game.definition)
+            : normalizeLevel(res.game.definition),
+        );
         setLiked(res.game.liked_by_me);
         setLikeCount(res.game.like_count);
       })
@@ -195,13 +204,15 @@ export default function Play() {
         <div className="stage placeholder">
           <span>This world is unavailable.</span>
         </div>
+      ) : kind === "arena" ? (
+        <ArenaRuntime arena={level as Arena} onWin={onWin} />
       ) : isEmpty ? (
         <div className="stage placeholder">
           <span>This world is still being built — check back soon.</span>
         </div>
       ) : (
         <Runtime
-          level={level}
+          level={level as Level}
           onWin={onWin}
           gameId={Number(id)}
           playerName={user?.displayName}

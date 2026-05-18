@@ -3,9 +3,9 @@ import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import Runtime from "../game/Runtime";
+import ArenaRuntime from "../game/ArenaRuntime";
 import {
   Level,
-  TileType,
   TILE,
   EMPTY,
   SOLID,
@@ -23,8 +23,19 @@ import {
   getTheme,
   normalizeLevel,
 } from "../game/level";
+import {
+  Arena,
+  ARENA_PALETTE,
+  A_WALL,
+  A_GEM,
+  A_ENEMY,
+  A_EXIT,
+  normalizeArena,
+  worldKind,
+} from "../game/arena";
 
-type Tool = TileType | "spawn" | "eraser";
+type Tool = number | "spawn" | "eraser";
+type Grid = Level | Arena;
 
 export default function Editor() {
   const { id } = useParams();
@@ -32,7 +43,8 @@ export default function Editor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const painting = useRef(false);
 
-  const [level, setLevel] = useState<Level | null>(null);
+  const [level, setLevel] = useState<Grid | null>(null);
+  const [kind, setKind] = useState<"platformer" | "arena">("platformer");
   const [title, setTitle] = useState("");
   const [published, setPublished] = useState(false);
   const [tool, setTool] = useState<Tool>(SOLID);
@@ -46,7 +58,13 @@ export default function Editor() {
       .then((res) => {
         setTitle(res.game.title);
         setPublished(res.game.published);
-        setLevel(normalizeLevel(res.game.definition));
+        const k = worldKind(res.game.definition);
+        setKind(k);
+        setLevel(
+          k === "arena"
+            ? normalizeArena(res.game.definition)
+            : normalizeLevel(res.game.definition),
+        );
       })
       .catch((e) => setError(e.message));
   }, [id]);
@@ -61,18 +79,47 @@ export default function Editor() {
     canvas.height = level.rows * TILE;
     const theme = getTheme(level.theme);
 
-    const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    sky.addColorStop(0, theme.skyTop);
-    sky.addColorStop(1, theme.skyBottom);
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (kind === "arena") {
+      ctx.fillStyle = theme.skyBottom;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+      const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      sky.addColorStop(0, theme.skyTop);
+      sky.addColorStop(1, theme.skyBottom);
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     for (let r = 0; r < level.rows; r++) {
       for (let c = 0; c < level.cols; c++) {
         const t = level.tiles[r * level.cols + c];
         const x = c * TILE;
         const y = r * TILE;
-        if (t === SOLID) {
+        if (kind === "arena") {
+          if (t === A_WALL) {
+            ctx.fillStyle = theme.ground;
+            ctx.fillRect(x, y, TILE, TILE);
+            ctx.fillStyle = theme.groundTop;
+            ctx.fillRect(x, y, TILE, 4);
+          } else if (t === A_GEM) {
+            ctx.fillStyle = "#ffce5c";
+            ctx.beginPath();
+            ctx.moveTo(x + TILE / 2, y + 7);
+            ctx.lineTo(x + TILE - 7, y + TILE / 2);
+            ctx.lineTo(x + TILE / 2, y + TILE - 7);
+            ctx.lineTo(x + 7, y + TILE / 2);
+            ctx.closePath();
+            ctx.fill();
+          } else if (t === A_ENEMY) {
+            ctx.fillStyle = "#d6536d";
+            ctx.beginPath();
+            ctx.arc(x + TILE / 2, y + TILE / 2, 11, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (t === A_EXIT) {
+            ctx.fillStyle = "#4fd6ff";
+            ctx.fillRect(x + 3, y + 3, TILE - 6, TILE - 6);
+          }
+        } else if (t === SOLID) {
           ctx.fillStyle = theme.ground;
           ctx.fillRect(x, y, TILE, TILE);
           ctx.fillStyle = theme.groundTop;
@@ -160,7 +207,7 @@ export default function Editor() {
     ctx.fillStyle = "#fff";
     ctx.font = "10px Segoe UI, sans-serif";
     ctx.fillText("P1", level.spawn.col * TILE + 9, level.spawn.row * TILE + 20);
-  }, [level, testing]);
+  }, [level, testing, kind]);
 
   function cellFromEvent(e: React.PointerEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current!;
@@ -230,7 +277,11 @@ export default function Editor() {
           <button className="btn-ghost" onClick={() => setTesting(false)}>
             ✕ Exit test
           </button>
-          <Runtime level={level} />
+          {kind === "arena" ? (
+            <ArenaRuntime arena={level as Arena} />
+          ) : (
+            <Runtime level={level as Level} />
+          )}
         </div>
       ) : (
         <>
@@ -249,7 +300,7 @@ export default function Editor() {
           </div>
 
           <div className="palette">
-            {PALETTE.map((p) => (
+            {(kind === "arena" ? ARENA_PALETTE : PALETTE).map((p) => (
               <button
                 key={p.type}
                 className={`tool ${tool === p.type ? "active" : ""}`}
@@ -291,9 +342,11 @@ export default function Editor() {
               onPointerLeave={() => (painting.current = false)}
             />
           </div>
-          <p className="muted controls-hint">
-            Scroll sideways to build across the whole level.
-          </p>
+          {kind === "platformer" && (
+            <p className="muted controls-hint">
+              Scroll sideways to build across the whole level.
+            </p>
+          )}
 
           <div className="editor-actions">
             <button className="btn" onClick={() => setTesting(true)}>

@@ -14,6 +14,7 @@ export default function Create() {
   const { user } = useAuth();
   const [games, setGames] = useState<MyGame[]>([]);
   const [title, setTitle] = useState("");
+  const [kind, setKind] = useState<"platformer" | "arena">("platformer");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function Create() {
     try {
       const res = await api<{ game: MyGame }>("/games", {
         method: "POST",
-        body: { title: title.trim() },
+        body: { title: title.trim(), definition: { kind } },
       });
       setGames((prev) => [res.game, ...prev]);
       setTitle("");
@@ -69,6 +70,13 @@ export default function Create() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
+        <select
+          value={kind}
+          onChange={(e) => setKind(e.target.value as "platformer" | "arena")}
+        >
+          <option value="platformer">Platformer</option>
+          <option value="arena">Top-down arena</option>
+        </select>
         <button className="btn" disabled={!title.trim()} onClick={createGame}>
           Create world
         </button>
