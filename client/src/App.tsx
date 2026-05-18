@@ -5,6 +5,7 @@ import Play from "./pages/Play";
 import Create from "./pages/Create";
 import Editor from "./pages/Editor";
 import Profile from "./pages/Profile";
+import UserProfile from "./pages/UserProfile";
 import Login from "./pages/Login";
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/create" element={<Create />} />
           <Route path="/edit/:id" element={<Editor />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/user/:id" element={<UserProfile />} />
           <Route path="/login" element={<Login />} />
         </Routes>
       </main>

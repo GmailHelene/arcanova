@@ -6,6 +6,7 @@ import cors from "cors";
 import { initSchema } from "./db";
 import { authRouter } from "./auth";
 import { gamesRouter } from "./games";
+import { usersRouter } from "./users";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
@@ -16,6 +17,7 @@ app.use(express.json({ limit: "2mb" }));
 app.get("/api/health", (_req, res) => res.json({ status: "ok", service: "arcanova" }));
 app.use("/api/auth", authRouter);
 app.use("/api/games", gamesRouter);
+app.use("/api/users", usersRouter);
 
 // Serve the built React client in production.
 const clientDist = path.join(__dirname, "../../client/dist");

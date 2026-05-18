@@ -12,6 +12,7 @@ interface GameDetail {
   creator: string;
   plays: number;
   definition: unknown;
+  creator_id: number;
   like_count: number;
   liked_by_me: boolean;
 }
@@ -108,7 +109,13 @@ export default function Play() {
     <div>
       <Link to="/" className="back-link">← Back to Discover</Link>
       <h1>{game.title}</h1>
-      <p className="muted">by {game.creator} · {game.plays} plays</p>
+      <p className="muted">
+        by{" "}
+        <Link to={`/user/${game.creator_id}`} className="inline-link">
+          {game.creator}
+        </Link>{" "}
+        · {game.plays} plays
+      </p>
       {game.description && <p>{game.description}</p>}
 
       <div className="play-actions">

@@ -45,7 +45,7 @@ opening the next.
 - ✅ Likes / favourites
 - ✅ Discover page: search + sort (newest, most played, most liked)
 - ✅ Share links for individual worlds
-- ⬜ Player profiles showing their published worlds
+- ✅ Player profiles showing their published worlds
 - ⬜ Featured worlds
 
 ### Phase 4 — Safety & trust ⬜ Planned
@@ -66,6 +66,7 @@ opening the next.
 
 ## Changelog
 
+- **2026-05-18** — Phase 3: public player profiles.
 - **2026-05-18** — Phase 3 started: likes, Discover search + sort, share links.
 - **2026-05-18** — Phase 2 complete: on-screen touch controls for mobile.
 - **2026-05-18** — Phase 2: background music with an on/off toggle.

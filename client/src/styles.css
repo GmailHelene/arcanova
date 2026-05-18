@@ -239,6 +239,11 @@ select:focus { outline: none; border-color: var(--accent); }
 .discover-bar input { flex: 1; min-width: 180px; }
 .play-actions { display: flex; gap: 10px; margin: 12px 0; }
 .btn-ghost.liked { border-color: var(--error); color: var(--error); }
+.inline-link { color: var(--accent-2); }
+.inline-link:hover { text-decoration: underline; }
+.profile-head {
+  display: flex; align-items: center; gap: 16px; margin: 16px 0 8px;
+}
 
 /* ---- Leaderboard ---- */
 .leaderboard {

@@ -20,6 +20,9 @@ export default function Profile() {
       <h1>{user.displayName}</h1>
       <p className="muted">@{user.username} · {user.email}</p>
       <Link to="/create" className="btn">Go to your creations</Link>
+      <Link to={`/user/${user.id}`} className="btn-ghost">
+        View your public profile
+      </Link>
     </div>
   );
 }
