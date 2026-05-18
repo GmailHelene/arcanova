@@ -1,7 +1,17 @@
 import { Router, Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import { query } from "./db";
+
+// Brute-force protection for the credential endpoints.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts — please wait a few minutes." },
+});
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-insecure-secret";
 if (JWT_SECRET === "dev-insecure-secret") {
@@ -76,7 +86,7 @@ export async function adminMiddleware(
 
 export const authRouter = Router();
 
-authRouter.post("/register", async (req: Request, res: Response) => {
+authRouter.post("/register", authLimiter, async (req: Request, res: Response) => {
   const { username, email, password, displayName } = req.body ?? {};
   if (!username || !email || !password) {
     return res.status(400).json({ error: "username, email and password are required" });
@@ -104,7 +114,7 @@ authRouter.post("/register", async (req: Request, res: Response) => {
   }
 });
 
-authRouter.post("/login", async (req: Request, res: Response) => {
+authRouter.post("/login", authLimiter, async (req: Request, res: Response) => {
   const { login, password } = req.body ?? {};
   if (!login || !password) {
     return res.status(400).json({ error: "login and password are required" });

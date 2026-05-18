@@ -138,11 +138,15 @@ gamesRouter.delete("/:id", authMiddleware, async (req: AuthedRequest, res: Respo
 
 // Record a score for a game's leaderboard.
 gamesRouter.post("/:id/scores", authMiddleware, async (req: AuthedRequest, res: Response) => {
-  const score = Number(req.body?.score);
-  if (!Number.isFinite(score)) return res.status(400).json({ error: "score must be a number" });
+  // Bound the score to a sane range. This blocks absurd values, but real
+  // anti-cheat would need server-authoritative gameplay (a later concern).
+  const raw = Number(req.body?.score);
+  if (!Number.isFinite(raw) || raw < 0 || raw > 10_000_000) {
+    return res.status(400).json({ error: "Invalid score" });
+  }
   await query(
     `INSERT INTO scores (game_id, user_id, score) VALUES ($1, $2, $3)`,
-    [req.params.id, req.userId, Math.round(score)]
+    [req.params.id, req.userId, Math.round(raw)]
   );
   await query(`UPDATE games SET plays = plays + 1 WHERE id = $1`, [req.params.id]);
   res.status(201).json({ ok: true });

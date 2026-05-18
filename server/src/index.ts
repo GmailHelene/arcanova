@@ -12,7 +12,14 @@ import { adminRouter } from "./admin";
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
 
-app.use(cors());
+// Railway runs the app behind a proxy; this makes req.ip (used for
+// rate-limiting) reflect the real client address.
+app.set("trust proxy", 1);
+
+// The client is served from the same origin as the API, so cross-origin
+// requests are not needed. Set CLIENT_ORIGIN only if a separate frontend
+// host ever needs access.
+app.use(cors({ origin: process.env.CLIENT_ORIGIN || false }));
 app.use(express.json({ limit: "2mb" }));
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok", service: "arcanova" }));

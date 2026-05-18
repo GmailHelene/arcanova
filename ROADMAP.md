@@ -69,8 +69,30 @@ payouts. That kept this phase small and buildable:
 - More world types (top-down arena, maze/quest)
 - Creator recognition and events
 
+## Technical hardening
+
+Tech debt, tracked separately from the feature phases.
+
+Done:
+- Rate-limiting on login / register
+- CORS restricted to a configured origin (was fully open)
+- Score submissions bounded — absurd / negative values are rejected
+
+Pending:
+- Automated tests + CI (build & test on every push)
+- Linting / formatting (ESLint + Prettier)
+- Real DB migrations — replace the ALTER-TABLE-on-startup approach
+- Auth via httpOnly cookies instead of localStorage (CSRF tradeoffs —
+  needs a decision)
+- Email verification (needs an email provider; may not fit a young
+  audience — needs a decision)
+- Server-authoritative anti-cheat for leaderboards (a Phase 5+ concern —
+  client scores can still be faked despite the sanity bound)
+
 ## Changelog
 
+- **2026-05-18** — Hardening: auth rate-limiting, CORS restricted,
+  score submissions bounded.
 - **2026-05-18** — Phase 4 complete: preset reactions on worlds (safe,
   no free-form text).
 - **2026-05-18** — Phase 4 started: report button, admin review queue,
