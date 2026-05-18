@@ -103,6 +103,8 @@ Decided against:
 
 ## Changelog
 
+- **2026-05-18** — Fix: arena respawn invulnerability + enemy reset on
+  death — stops an unescapable death loop when an enemy reaches the spawn.
 - **2026-05-18** — Phase 6: example worlds seeded on first startup;
   first-time help text in the editor.
 - **2026-05-18** — Phase 6: live multiplayer presence added to arena worlds.

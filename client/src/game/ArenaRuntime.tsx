@@ -120,16 +120,16 @@ export default function ArenaRuntime({ arena, onWin, gameId, playerName }: Props
     }
     spawnPlayer();
 
-    const enemies: { x: number; y: number }[] = [];
+    // Enemies remember their origin so a death resets them (no spawn camping).
+    const enemies: { x: number; y: number; ox: number; oy: number }[] = [];
     let gemsTotal = 0;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const t = tiles[r * cols + c];
         if (t === A_ENEMY) {
-          enemies.push({
-            x: c * TILE + (TILE - PW) / 2,
-            y: r * TILE + (TILE - PW) / 2,
-          });
+          const ex = c * TILE + (TILE - PW) / 2;
+          const ey = r * TILE + (TILE - PW) / 2;
+          enemies.push({ x: ex, y: ey, ox: ex, oy: ey });
         }
         if (t === A_GEM) gemsTotal++;
       }
@@ -138,6 +138,7 @@ export default function ArenaRuntime({ arena, onWin, gameId, playerName }: Props
     let deaths = 0;
     let frames = 0;
     let finished = false;
+    let invuln = 0; // brief safety window after a respawn
 
     function isWall(c: number, r: number) {
       if (c < 0 || c >= cols || r < 0 || r >= rows) return true;
@@ -186,6 +187,7 @@ export default function ArenaRuntime({ arena, onWin, gameId, playerName }: Props
 
     function update() {
       frames++;
+      if (invuln > 0) invuln--;
       const t = touchRef.current;
       let dx =
         (keys["arrowright"] || keys["d"] || t.right ? 1 : 0) -
@@ -206,6 +208,7 @@ export default function ArenaRuntime({ arena, onWin, gameId, playerName }: Props
         const dist = Math.hypot(ex, ey) || 1;
         tryMove(e, (ex / dist) * 1.4, (ey / dist) * 1.4);
         if (
+          invuln <= 0 &&
           player.x < e.x + PW &&
           player.x + PW > e.x &&
           player.y < e.y + PW &&
@@ -213,7 +216,12 @@ export default function ArenaRuntime({ arena, onWin, gameId, playerName }: Props
         ) {
           deaths++;
           sfx.die();
+          invuln = 100;
           spawnPlayer();
+          for (const other of enemies) {
+            other.x = other.ox;
+            other.y = other.oy;
+          }
           return;
         }
       }
@@ -308,8 +316,11 @@ export default function ArenaRuntime({ arena, onWin, gameId, playerName }: Props
         ctx.textAlign = "left";
       }
 
-      ctx.fillStyle = "#8b6bff";
-      ctx.fillRect(player.x, player.y, PW, PW);
+      // The player blinks while briefly invulnerable after a respawn.
+      if (invuln <= 0 || Math.floor(invuln / 6) % 2 === 0) {
+        ctx.fillStyle = "#8b6bff";
+        ctx.fillRect(player.x, player.y, PW, PW);
+      }
 
       let hudText = `Gems ${gemsGot}/${gemsTotal}   Time ${Math.floor(
         frames / 60,
