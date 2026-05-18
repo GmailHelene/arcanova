@@ -65,7 +65,7 @@ function publicUser(row: any) {
 export async function adminMiddleware(
   req: AuthedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {
@@ -100,7 +100,7 @@ authRouter.post("/register", authLimiter, async (req: Request, res: Response) =>
       `INSERT INTO users (username, email, password_hash, display_name)
        VALUES ($1, $2, $3, $4)
        RETURNING id, username, email, display_name, is_admin`,
-      [username, email, hash, displayName || username]
+      [username, email, hash, displayName || username],
     );
     const user = result.rows[0];
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "30d" });
@@ -122,7 +122,7 @@ authRouter.post("/login", authLimiter, async (req: Request, res: Response) => {
   try {
     const result = await query(
       `SELECT * FROM users WHERE username = $1 OR email = $1`,
-      [login]
+      [login],
     );
     const user = result.rows[0];
     if (!user || !(await bcrypt.compare(String(password), user.password_hash))) {
@@ -139,7 +139,7 @@ authRouter.post("/login", authLimiter, async (req: Request, res: Response) => {
 authRouter.get("/me", authMiddleware, async (req: AuthedRequest, res: Response) => {
   const result = await query(
     `SELECT id, username, email, display_name, is_admin FROM users WHERE id = $1`,
-    [req.userId]
+    [req.userId],
   );
   if (!result.rows[0]) return res.status(404).json({ error: "User not found" });
   res.json({ user: publicUser(result.rows[0]) });

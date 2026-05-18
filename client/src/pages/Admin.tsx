@@ -57,7 +57,9 @@ export default function Admin() {
       <div className="panel">
         <h1>Admin</h1>
         <p>This area is for admins only.</p>
-        <Link to="/" className="btn">Back to Discover</Link>
+        <Link to="/" className="btn">
+          Back to Discover
+        </Link>
       </div>
     );
   }

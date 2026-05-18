@@ -38,12 +38,54 @@ export interface Theme {
 }
 
 export const THEMES: Theme[] = [
-  { id: "twilight", name: "Twilight", skyTop: "#2a2356", skyBottom: "#181433", ground: "#5b8c5a", groundTop: "#6fa86d" },
-  { id: "jungle", name: "Jungle", skyTop: "#1f4d2e", skyBottom: "#0e2a1a", ground: "#6b4a2a", groundTop: "#3f8a3f" },
-  { id: "space", name: "Space", skyTop: "#0a0a2e", skyBottom: "#02020f", ground: "#454569", groundTop: "#8585bd" },
-  { id: "cave", name: "Cave", skyTop: "#231f2e", skyBottom: "#0c0a14", ground: "#4a3f55", groundTop: "#6a5a78" },
-  { id: "snow", name: "Snow", skyTop: "#5a7fae", skyBottom: "#324a6e", ground: "#8f9db6", groundTop: "#eef3ff" },
-  { id: "lava", name: "Lava", skyTop: "#4a1820", skyBottom: "#1c0a0c", ground: "#3a2520", groundTop: "#c7531f" },
+  {
+    id: "twilight",
+    name: "Twilight",
+    skyTop: "#2a2356",
+    skyBottom: "#181433",
+    ground: "#5b8c5a",
+    groundTop: "#6fa86d",
+  },
+  {
+    id: "jungle",
+    name: "Jungle",
+    skyTop: "#1f4d2e",
+    skyBottom: "#0e2a1a",
+    ground: "#6b4a2a",
+    groundTop: "#3f8a3f",
+  },
+  {
+    id: "space",
+    name: "Space",
+    skyTop: "#0a0a2e",
+    skyBottom: "#02020f",
+    ground: "#454569",
+    groundTop: "#8585bd",
+  },
+  {
+    id: "cave",
+    name: "Cave",
+    skyTop: "#231f2e",
+    skyBottom: "#0c0a14",
+    ground: "#4a3f55",
+    groundTop: "#6a5a78",
+  },
+  {
+    id: "snow",
+    name: "Snow",
+    skyTop: "#5a7fae",
+    skyBottom: "#324a6e",
+    ground: "#8f9db6",
+    groundTop: "#eef3ff",
+  },
+  {
+    id: "lava",
+    name: "Lava",
+    skyTop: "#4a1820",
+    skyBottom: "#1c0a0c",
+    ground: "#3a2520",
+    groundTop: "#c7531f",
+  },
 ];
 
 export const DEFAULT_THEME = "twilight";

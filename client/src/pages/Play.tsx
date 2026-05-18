@@ -148,7 +148,7 @@ export default function Play() {
         setNote(e.message);
       }
     },
-    [id, user, loadScores]
+    [id, user, loadScores],
   );
 
   if (error) return <p className="error">{error}</p>;
@@ -166,7 +166,9 @@ export default function Play() {
 
   return (
     <div>
-      <Link to="/" className="back-link">← Back to Discover</Link>
+      <Link to="/" className="back-link">
+        ← Back to Discover
+      </Link>
       <h1>{game.title}</h1>
       <p className="muted">
         by{" "}
@@ -178,10 +180,7 @@ export default function Play() {
       {game.description && <p>{game.description}</p>}
 
       <div className="play-actions">
-        <button
-          className={`btn-ghost ${liked ? "liked" : ""}`}
-          onClick={toggleLike}
-        >
+        <button className={`btn-ghost ${liked ? "liked" : ""}`} onClick={toggleLike}>
           {liked ? "♥" : "♡"} {likeCount}
         </button>
         <button className="btn-ghost" onClick={share}>

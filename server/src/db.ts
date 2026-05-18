@@ -3,7 +3,9 @@ import { SCHEMA_SQL } from "./schema";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
-  console.error("DATABASE_URL is not set. Copy .env.example to .env (see README in chat).");
+  console.error(
+    "DATABASE_URL is not set. Copy .env.example to .env (see README in chat).",
+  );
   process.exit(1);
 }
 

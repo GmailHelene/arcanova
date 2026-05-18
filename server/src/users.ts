@@ -12,7 +12,7 @@ usersRouter.get("/:id", async (req: Request, res: Response) => {
 
   const userResult = await query(
     `SELECT id, username, display_name, created_at FROM users WHERE id = $1`,
-    [userId]
+    [userId],
   );
   if (!userResult.rows[0]) return res.status(404).json({ error: "User not found" });
 
@@ -24,7 +24,7 @@ usersRouter.get("/:id", async (req: Request, res: Response) => {
       WHERE g.creator_id = $1 AND g.published = true AND g.hidden = false
       GROUP BY g.id
       ORDER BY g.created_at DESC`,
-    [userId]
+    [userId],
   );
 
   res.json({ user: userResult.rows[0], games: games.rows });

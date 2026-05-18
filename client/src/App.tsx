@@ -19,7 +19,9 @@ export default function App() {
           <span className="brand-mark">✦</span> Arcanova
         </NavLink>
         <nav className="nav">
-          <NavLink to="/" end>Discover</NavLink>
+          <NavLink to="/" end>
+            Discover
+          </NavLink>
           <NavLink to="/create">Create</NavLink>
           {user && <NavLink to="/profile">Profile</NavLink>}
           {user?.isAdmin && <NavLink to="/admin">Admin</NavLink>}
@@ -28,10 +30,14 @@ export default function App() {
           {user ? (
             <>
               <span className="hello">Hi, {user.displayName}</span>
-              <button className="btn-ghost" onClick={logout}>Sign out</button>
+              <button className="btn-ghost" onClick={logout}>
+                Sign out
+              </button>
             </>
           ) : (
-            <NavLink to="/login" className="btn">Sign in</NavLink>
+            <NavLink to="/login" className="btn">
+              Sign in
+            </NavLink>
           )}
         </div>
       </header>

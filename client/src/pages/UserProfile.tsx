@@ -37,11 +37,11 @@ export default function UserProfile() {
 
   return (
     <div>
-      <Link to="/" className="back-link">← Back to Discover</Link>
+      <Link to="/" className="back-link">
+        ← Back to Discover
+      </Link>
       <div className="profile-head">
-        <div className="avatar">
-          {profile.display_name.charAt(0).toUpperCase()}
-        </div>
+        <div className="avatar">{profile.display_name.charAt(0).toUpperCase()}</div>
         <div>
           <h1>{profile.display_name}</h1>
           <p className="muted">

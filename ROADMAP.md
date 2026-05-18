@@ -77,10 +77,10 @@ Done:
 - Rate-limiting on login / register
 - CORS restricted to a configured origin (was fully open)
 - Score submissions bounded — absurd / negative values are rejected
+- Linting + formatting (ESLint + Prettier)
+- Automated tests (Vitest) + CI that runs lint, tests and build on every push
 
 Pending:
-- Automated tests + CI (build & test on every push)
-- Linting / formatting (ESLint + Prettier)
 - Real DB migrations — replace the ALTER-TABLE-on-startup approach
 - Auth via httpOnly cookies instead of localStorage (CSRF tradeoffs —
   needs a decision)
@@ -91,6 +91,8 @@ Pending:
 
 ## Changelog
 
+- **2026-05-18** — Tooling: ESLint + Prettier, Vitest test suite, GitHub
+  Actions CI (lint + test + build).
 - **2026-05-18** — Hardening: auth rate-limiting, CORS restricted,
   score submissions bounded.
 - **2026-05-18** — Phase 4 complete: preset reactions on worlds (safe,

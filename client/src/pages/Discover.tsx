@@ -61,7 +61,9 @@ export default function Discover() {
       <section className="hero">
         <h1>Enter the Arcanova</h1>
         <p>Explore worlds built by players around the globe — or build your own.</p>
-        <Link to="/create" className="btn btn-lg">Start creating</Link>
+        <Link to="/create" className="btn btn-lg">
+          Start creating
+        </Link>
       </section>
 
       {featured.length > 0 && (

@@ -117,11 +117,7 @@ export default function Editor() {
           ctx.fillRect(x, y + 8, TILE, 4);
           ctx.fillStyle = "#fff";
           ctx.font = "14px Segoe UI, sans-serif";
-          ctx.fillText(
-            t === MOVER_H ? "↔" : "↕",
-            x + TILE / 2 - 6,
-            y + TILE / 2 + 6
-          );
+          ctx.fillText(t === MOVER_H ? "↔" : "↕", x + TILE / 2 - 6, y + TILE / 2 + 6);
         }
       }
     }
@@ -147,7 +143,7 @@ export default function Editor() {
       level.spawn.col * TILE + 6,
       level.spawn.row * TILE + 4,
       TILE - 12,
-      TILE - 8
+      TILE - 8,
     );
     ctx.fillStyle = "#fff";
     ctx.font = "10px Segoe UI, sans-serif";
@@ -201,7 +197,9 @@ export default function Editor() {
       <div className="panel">
         <h1>Editor</h1>
         <p>Sign in to edit your worlds.</p>
-        <Link to="/login" className="btn">Sign in</Link>
+        <Link to="/login" className="btn">
+          Sign in
+        </Link>
       </div>
     );
   }
@@ -210,7 +208,9 @@ export default function Editor() {
 
   return (
     <div>
-      <Link to="/create" className="back-link">← Back to your creations</Link>
+      <Link to="/create" className="back-link">
+        ← Back to your creations
+      </Link>
       <h1>{title}</h1>
 
       {testing ? (
@@ -229,7 +229,9 @@ export default function Editor() {
               onChange={(e) => setLevel({ ...level, theme: e.target.value })}
             >
               {THEMES.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
               ))}
             </select>
           </div>

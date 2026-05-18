@@ -12,7 +12,7 @@ export function setToken(token: string | null) {
 // Thin wrapper around fetch that attaches the auth token and parses JSON.
 export async function api<T = any>(
   path: string,
-  options: { method?: string; body?: unknown } = {}
+  options: { method?: string; body?: unknown } = {},
 ): Promise<T> {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   const token = getToken();

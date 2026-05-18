@@ -16,7 +16,7 @@ adminRouter.get("/reports", async (_req: Request, res: Response) => {
        JOIN games g ON g.id = r.game_id
        JOIN users u ON u.id = r.reporter_id
       WHERE r.status = 'open'
-      ORDER BY r.created_at DESC`
+      ORDER BY r.created_at DESC`,
   );
   res.json({ reports: result.rows });
 });
@@ -28,7 +28,7 @@ adminRouter.get("/hidden", async (_req: Request, res: Response) => {
        FROM games g
        JOIN users u ON u.id = g.creator_id
       WHERE g.hidden = true
-      ORDER BY g.title`
+      ORDER BY g.title`,
   );
   res.json({ games: result.rows });
 });
@@ -38,7 +38,7 @@ adminRouter.post("/games/:id/hide", async (req: Request, res: Response) => {
   await query(`UPDATE games SET hidden = true WHERE id = $1`, [req.params.id]);
   await query(
     `UPDATE reports SET status = 'reviewed' WHERE game_id = $1 AND status = 'open'`,
-    [req.params.id]
+    [req.params.id],
   );
   res.json({ ok: true });
 });

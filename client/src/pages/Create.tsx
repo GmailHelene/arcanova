@@ -53,7 +53,9 @@ export default function Create() {
       <div className="panel">
         <h1>Create</h1>
         <p>You need an account to build worlds.</p>
-        <Link to="/login" className="btn">Sign in to start</Link>
+        <Link to="/login" className="btn">
+          Sign in to start
+        </Link>
       </div>
     );
   }

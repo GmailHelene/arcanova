@@ -22,9 +22,11 @@ gamesRouter.get("/", optionalAuth, async (req: AuthedRequest, res: Response) => 
   const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
   const sort = req.query.sort;
   const orderBy =
-    sort === "plays" ? "g.plays DESC" :
-    sort === "likes" ? "like_count DESC" :
-    "g.created_at DESC";
+    sort === "plays"
+      ? "g.plays DESC"
+      : sort === "likes"
+        ? "like_count DESC"
+        : "g.created_at DESC";
   const result = await query(
     `SELECT g.id, g.title, g.description, g.plays, g.created_at, g.creator_id,
             u.display_name AS creator,
@@ -39,7 +41,7 @@ gamesRouter.get("/", optionalAuth, async (req: AuthedRequest, res: Response) => 
       GROUP BY g.id, u.display_name
       ORDER BY ${orderBy}
       LIMIT 60`,
-    [search, req.userId ?? 0]
+    [search, req.userId ?? 0],
   );
   res.json({ games: result.rows });
 });
@@ -49,7 +51,7 @@ gamesRouter.get("/mine", authMiddleware, async (req: AuthedRequest, res: Respons
   const result = await query(
     `SELECT id, title, description, plays, published, updated_at
        FROM games WHERE creator_id = $1 ORDER BY updated_at DESC`,
-    [req.userId]
+    [req.userId],
   );
   res.json({ games: result.rows });
 });
@@ -67,7 +69,7 @@ gamesRouter.get("/featured", async (_req: Request, res: Response) => {
       WHERE g.published = true AND g.hidden = false
       GROUP BY g.id, u.display_name
       ORDER BY like_count DESC, g.plays DESC
-      LIMIT 3`
+      LIMIT 3`,
   );
   res.json({ games: result.rows });
 });
@@ -84,7 +86,7 @@ gamesRouter.get("/:id", optionalAuth, async (req: AuthedRequest, res: Response) 
        LEFT JOIN likes l ON l.game_id = g.id
       WHERE g.id = $1
       GROUP BY g.id, u.display_name`,
-    [req.params.id, req.userId ?? 0]
+    [req.params.id, req.userId ?? 0],
   );
   if (!result.rows[0]) return res.status(404).json({ error: "Game not found" });
   res.json({ game: result.rows[0] });
@@ -98,14 +100,16 @@ gamesRouter.post("/", authMiddleware, async (req: AuthedRequest, res: Response) 
     `INSERT INTO games (creator_id, title, description, definition)
      VALUES ($1, $2, $3, $4)
      RETURNING id, title, description, definition, published`,
-    [req.userId, title, description || "", definition || {}]
+    [req.userId, title, description || "", definition || {}],
   );
   res.status(201).json({ game: result.rows[0] });
 });
 
 // Update a game's content or publish state. Only the creator may do this.
 gamesRouter.put("/:id", authMiddleware, async (req: AuthedRequest, res: Response) => {
-  const owned = await query(`SELECT creator_id FROM games WHERE id = $1`, [req.params.id]);
+  const owned = await query(`SELECT creator_id FROM games WHERE id = $1`, [
+    req.params.id,
+  ]);
   if (!owned.rows[0]) return res.status(404).json({ error: "Game not found" });
   if (owned.rows[0].creator_id !== req.userId) {
     return res.status(403).json({ error: "This is not your game" });
@@ -120,84 +124,117 @@ gamesRouter.put("/:id", authMiddleware, async (req: AuthedRequest, res: Response
             updated_at  = now()
       WHERE id = $1
       RETURNING id, title, description, definition, published`,
-    [req.params.id, title ?? null, description ?? null, definition ?? null, published ?? null]
+    [
+      req.params.id,
+      title ?? null,
+      description ?? null,
+      definition ?? null,
+      published ?? null,
+    ],
   );
   res.json({ game: result.rows[0] });
 });
 
 // Delete a game. Only the creator may do this. Scores cascade automatically.
-gamesRouter.delete("/:id", authMiddleware, async (req: AuthedRequest, res: Response) => {
-  const owned = await query(`SELECT creator_id FROM games WHERE id = $1`, [req.params.id]);
-  if (!owned.rows[0]) return res.status(404).json({ error: "Game not found" });
-  if (owned.rows[0].creator_id !== req.userId) {
-    return res.status(403).json({ error: "This is not your game" });
-  }
-  await query(`DELETE FROM games WHERE id = $1`, [req.params.id]);
-  res.json({ ok: true });
-});
+gamesRouter.delete(
+  "/:id",
+  authMiddleware,
+  async (req: AuthedRequest, res: Response) => {
+    const owned = await query(`SELECT creator_id FROM games WHERE id = $1`, [
+      req.params.id,
+    ]);
+    if (!owned.rows[0]) return res.status(404).json({ error: "Game not found" });
+    if (owned.rows[0].creator_id !== req.userId) {
+      return res.status(403).json({ error: "This is not your game" });
+    }
+    await query(`DELETE FROM games WHERE id = $1`, [req.params.id]);
+    res.json({ ok: true });
+  },
+);
 
 // Record a score for a game's leaderboard.
-gamesRouter.post("/:id/scores", authMiddleware, async (req: AuthedRequest, res: Response) => {
-  // Bound the score to a sane range. This blocks absurd values, but real
-  // anti-cheat would need server-authoritative gameplay (a later concern).
-  const raw = Number(req.body?.score);
-  if (!Number.isFinite(raw) || raw < 0 || raw > 10_000_000) {
-    return res.status(400).json({ error: "Invalid score" });
-  }
-  await query(
-    `INSERT INTO scores (game_id, user_id, score) VALUES ($1, $2, $3)`,
-    [req.params.id, req.userId, Math.round(raw)]
-  );
-  await query(`UPDATE games SET plays = plays + 1 WHERE id = $1`, [req.params.id]);
-  res.status(201).json({ ok: true });
-});
+gamesRouter.post(
+  "/:id/scores",
+  authMiddleware,
+  async (req: AuthedRequest, res: Response) => {
+    // Bound the score to a sane range. This blocks absurd values, but real
+    // anti-cheat would need server-authoritative gameplay (a later concern).
+    const raw = Number(req.body?.score);
+    if (!Number.isFinite(raw) || raw < 0 || raw > 10_000_000) {
+      return res.status(400).json({ error: "Invalid score" });
+    }
+    await query(`INSERT INTO scores (game_id, user_id, score) VALUES ($1, $2, $3)`, [
+      req.params.id,
+      req.userId,
+      Math.round(raw),
+    ]);
+    await query(`UPDATE games SET plays = plays + 1 WHERE id = $1`, [req.params.id]);
+    res.status(201).json({ ok: true });
+  },
+);
 
 // Like a game.
-gamesRouter.post("/:id/like", authMiddleware, async (req: AuthedRequest, res: Response) => {
-  await query(
-    `INSERT INTO likes (game_id, user_id) VALUES ($1, $2)
+gamesRouter.post(
+  "/:id/like",
+  authMiddleware,
+  async (req: AuthedRequest, res: Response) => {
+    await query(
+      `INSERT INTO likes (game_id, user_id) VALUES ($1, $2)
      ON CONFLICT DO NOTHING`,
-    [req.params.id, req.userId]
-  );
-  res.json({ ok: true });
-});
+      [req.params.id, req.userId],
+    );
+    res.json({ ok: true });
+  },
+);
 
 // Remove a like.
-gamesRouter.delete("/:id/like", authMiddleware, async (req: AuthedRequest, res: Response) => {
-  await query(
-    `DELETE FROM likes WHERE game_id = $1 AND user_id = $2`,
-    [req.params.id, req.userId]
-  );
-  res.json({ ok: true });
-});
+gamesRouter.delete(
+  "/:id/like",
+  authMiddleware,
+  async (req: AuthedRequest, res: Response) => {
+    await query(`DELETE FROM likes WHERE game_id = $1 AND user_id = $2`, [
+      req.params.id,
+      req.userId,
+    ]);
+    res.json({ ok: true });
+  },
+);
 
 // Report a world for an admin to review.
-gamesRouter.post("/:id/report", authMiddleware, async (req: AuthedRequest, res: Response) => {
-  const reason =
-    typeof req.body?.reason === "string" ? req.body.reason.slice(0, 500) : "";
-  const exists = await query(`SELECT id FROM games WHERE id = $1`, [req.params.id]);
-  if (!exists.rows[0]) return res.status(404).json({ error: "Game not found" });
-  await query(
-    `INSERT INTO reports (game_id, reporter_id, reason) VALUES ($1, $2, $3)`,
-    [req.params.id, req.userId, reason]
-  );
-  res.status(201).json({ ok: true });
-});
+gamesRouter.post(
+  "/:id/report",
+  authMiddleware,
+  async (req: AuthedRequest, res: Response) => {
+    const reason =
+      typeof req.body?.reason === "string" ? req.body.reason.slice(0, 500) : "";
+    const exists = await query(`SELECT id FROM games WHERE id = $1`, [req.params.id]);
+    if (!exists.rows[0]) return res.status(404).json({ error: "Game not found" });
+    await query(
+      `INSERT INTO reports (game_id, reporter_id, reason) VALUES ($1, $2, $3)`,
+      [req.params.id, req.userId, reason],
+    );
+    res.status(201).json({ ok: true });
+  },
+);
 
 // Post a preset reaction to a world (one per player; posting again replaces it).
-gamesRouter.post("/:id/reactions", authMiddleware, async (req: AuthedRequest, res: Response) => {
-  const phrase = req.body?.phrase;
-  if (typeof phrase !== "string" || !PRESET_PHRASES.includes(phrase)) {
-    return res.status(400).json({ error: "Pick one of the preset phrases" });
-  }
-  await query(
-    `INSERT INTO reactions (game_id, user_id, phrase) VALUES ($1, $2, $3)
+gamesRouter.post(
+  "/:id/reactions",
+  authMiddleware,
+  async (req: AuthedRequest, res: Response) => {
+    const phrase = req.body?.phrase;
+    if (typeof phrase !== "string" || !PRESET_PHRASES.includes(phrase)) {
+      return res.status(400).json({ error: "Pick one of the preset phrases" });
+    }
+    await query(
+      `INSERT INTO reactions (game_id, user_id, phrase) VALUES ($1, $2, $3)
      ON CONFLICT (game_id, user_id)
      DO UPDATE SET phrase = EXCLUDED.phrase, created_at = now()`,
-    [req.params.id, req.userId, phrase]
-  );
-  res.status(201).json({ ok: true });
-});
+      [req.params.id, req.userId, phrase],
+    );
+    res.status(201).json({ ok: true });
+  },
+);
 
 // Reactions left on a world.
 gamesRouter.get("/:id/reactions", async (req: Request, res: Response) => {
@@ -208,7 +245,7 @@ gamesRouter.get("/:id/reactions", async (req: Request, res: Response) => {
       WHERE r.game_id = $1
       ORDER BY r.created_at DESC
       LIMIT 50`,
-    [req.params.id]
+    [req.params.id],
   );
   res.json({ reactions: result.rows });
 });
@@ -222,7 +259,7 @@ gamesRouter.get("/:id/scores", async (req: Request, res: Response) => {
       WHERE s.game_id = $1
       ORDER BY s.score DESC
       LIMIT 20`,
-    [req.params.id]
+    [req.params.id],
   );
   res.json({ scores: result.rows });
 });

@@ -32,7 +32,7 @@ export default function Runtime({ level, onWin }: Props) {
   const [isTouch] = useState(
     () =>
       typeof window !== "undefined" &&
-      window.matchMedia?.("(pointer: coarse)").matches === true
+      window.matchMedia?.("(pointer: coarse)").matches === true,
   );
 
   // Background music runs while enabled, independent of the game loop.
@@ -389,7 +389,7 @@ export default function Runtime({ level, onWin }: Props) {
       ctx.fillText(
         `Coins ${coins}   Time ${Math.floor(frames / 60)}s   Deaths ${deaths}`,
         16,
-        28
+        28,
       );
     }
 
@@ -456,8 +456,12 @@ export default function Runtime({ level, onWin }: Props) {
       {won && (
         <div className="win-overlay">
           <h2>Level complete!</h2>
-          <p>Score: <b>{won.score}</b></p>
-          <button className="btn" onClick={replay}>Play again</button>
+          <p>
+            Score: <b>{won.score}</b>
+          </p>
+          <button className="btn" onClick={replay}>
+            Play again
+          </button>
         </div>
       )}
       <div className="runtime-footer">
@@ -466,10 +470,7 @@ export default function Runtime({ level, onWin }: Props) {
             ? "Use the on-screen buttons to move and jump."
             : "Move: arrows or A / D · Jump: up, W or space"}
         </span>
-        <button
-          className="btn-ghost"
-          onClick={() => setMusicOn((m) => !m)}
-        >
+        <button className="btn-ghost" onClick={() => setMusicOn((m) => !m)}>
           {musicOn ? "Music: on" : "Music: off"}
         </button>
       </div>
