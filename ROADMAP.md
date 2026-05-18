@@ -72,8 +72,9 @@ Railway rather than a serverless host).
 ### Phase 6 — Beyond 🔄 In progress
 - ✅ Creator recognition — badges on profiles (First World, Prolific,
   Crowd-Pleaser, Beloved), derived from a creator's stats
-- ✅ Second world type — top-down arena (walls, gems, enemies, exit).
-  Worlds are now tagged with a `kind`; the editor and runtime adapt.
+- ✅ Second world type — top-down arena (walls, gems, enemies, exit),
+  with live multiplayer presence. Worlds are tagged with a `kind`; the
+  editor and runtime adapt.
 - ⬜ More world types (maze/quest)
 - ⬜ Events
 
@@ -100,6 +101,7 @@ Decided against:
 
 ## Changelog
 
+- **2026-05-18** — Phase 6: live multiplayer presence added to arena worlds.
 - **2026-05-18** — Phase 6: top-down arena world type (a second world
   kind) — walls, gems, enemies and an exit, with its own editor and runtime.
 - **2026-05-18** — Phase 6: creator badges on profiles.

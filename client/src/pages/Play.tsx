@@ -205,7 +205,12 @@ export default function Play() {
           <span>This world is unavailable.</span>
         </div>
       ) : kind === "arena" ? (
-        <ArenaRuntime arena={level as Arena} onWin={onWin} />
+        <ArenaRuntime
+          arena={level as Arena}
+          onWin={onWin}
+          gameId={Number(id)}
+          playerName={user?.displayName}
+        />
       ) : isEmpty ? (
         <div className="stage placeholder">
           <span>This world is still being built — check back soon.</span>

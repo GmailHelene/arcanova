@@ -3,18 +3,32 @@ import { Arena, TILE, A_EMPTY, A_WALL, A_GEM, A_ENEMY, A_EXIT } from "./arena";
 import { getTheme } from "./level";
 import { sfx, music } from "./sound";
 
+interface Peer {
+  name: string;
+  color: string;
+  x: number;
+  y: number;
+  tx: number;
+  ty: number;
+}
+
 interface Props {
   arena: Arena;
   onWin?: (score: number) => void;
+  // When set, the runtime joins a live-presence room for this world.
+  gameId?: number;
+  playerName?: string;
 }
 
 type Dir = "up" | "down" | "left" | "right";
 
 // Plays a top-down arena: move in any direction, collect every gem, avoid
 // the enemies, then reach the exit. Full keyboard control (WASD / arrows).
-export default function ArenaRuntime({ arena, onWin }: Props) {
+export default function ArenaRuntime({ arena, onWin, gameId, playerName }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const touchRef = useRef({ up: false, down: false, left: false, right: false });
+  const wsRef = useRef<WebSocket | null>(null);
+  const peersRef = useRef<Map<number, Peer>>(new Map());
   const [runId, setRunId] = useState(0);
   const [won, setWon] = useState<{ score: number } | null>(null);
   const [musicOn, setMusicOn] = useState(true);
@@ -29,6 +43,48 @@ export default function ArenaRuntime({ arena, onWin }: Props) {
     music.start();
     return () => music.stop();
   }, [musicOn]);
+
+  // Live presence: connect to the world's room and track other players.
+  useEffect(() => {
+    if (!gameId) return;
+    const peers = peersRef.current;
+    const proto = location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${proto}://${location.host}/ws`);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ t: "join", gameId, name: playerName || "Guest" }));
+    };
+    ws.onmessage = (ev) => {
+      let msg: any;
+      try {
+        msg = JSON.parse(ev.data);
+      } catch {
+        return;
+      }
+      if (msg.t === "welcome") {
+        peers.clear();
+        for (const p of msg.peers) peers.set(p.id, { ...p, tx: p.x, ty: p.y });
+      } else if (msg.t === "joined") {
+        const p = msg.peer;
+        peers.set(p.id, { ...p, tx: p.x, ty: p.y });
+      } else if (msg.t === "pos") {
+        const p = peers.get(msg.id);
+        if (p) {
+          p.tx = msg.x;
+          p.ty = msg.y;
+        }
+      } else if (msg.t === "left") {
+        peers.delete(msg.id);
+      }
+    };
+
+    return () => {
+      wsRef.current = null;
+      peers.clear();
+      ws.close();
+    };
+  }, [gameId, playerName]);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -183,6 +239,20 @@ export default function ArenaRuntime({ arena, onWin }: Props) {
           }
         }
       }
+
+      // Broadcast our position to peers in the room (throttled).
+      if (gameId && frames % 4 === 0) {
+        const ws = wsRef.current;
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(
+            JSON.stringify({
+              t: "pos",
+              x: Math.round(player.x),
+              y: Math.round(player.y),
+            }),
+          );
+        }
+      }
     }
 
     function draw() {
@@ -223,18 +293,33 @@ export default function ArenaRuntime({ arena, onWin }: Props) {
         ctx.fill();
       }
 
+      // Other players (live presence), eased toward their latest position.
+      for (const peer of peersRef.current.values()) {
+        peer.x += (peer.tx - peer.x) * 0.25;
+        peer.y += (peer.ty - peer.y) * 0.25;
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = peer.color;
+        ctx.fillRect(peer.x, peer.y, PW, PW);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "#e9e7f5";
+        ctx.font = "11px Segoe UI, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(peer.name, peer.x + PW / 2, peer.y - 5);
+        ctx.textAlign = "left";
+      }
+
       ctx.fillStyle = "#8b6bff";
       ctx.fillRect(player.x, player.y, PW, PW);
 
+      let hudText = `Gems ${gemsGot}/${gemsTotal}   Time ${Math.floor(
+        frames / 60,
+      )}s   Deaths ${deaths}`;
+      if (gameId) hudText += `   Players ${peersRef.current.size + 1}`;
       ctx.fillStyle = "rgba(12,10,26,0.7)";
-      ctx.fillRect(8, 8, 320, 30);
+      ctx.fillRect(8, 8, gameId ? 430 : 320, 30);
       ctx.fillStyle = "#e9e7f5";
       ctx.font = "16px Segoe UI, sans-serif";
-      ctx.fillText(
-        `Gems ${gemsGot}/${gemsTotal}   Time ${Math.floor(frames / 60)}s   Deaths ${deaths}`,
-        16,
-        28,
-      );
+      ctx.fillText(hudText, 16, 28);
     }
 
     let raf = 0;
@@ -250,7 +335,7 @@ export default function ArenaRuntime({ arena, onWin }: Props) {
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
     };
-  }, [arena, runId, onWin]);
+  }, [arena, runId, onWin, gameId]);
 
   function replay() {
     setWon(null);
