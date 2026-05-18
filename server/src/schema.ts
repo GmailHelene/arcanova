@@ -49,6 +49,15 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Safe communication: one preset reaction per player per world.
+CREATE TABLE IF NOT EXISTS reactions (
+  game_id    INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  phrase     TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (game_id, user_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_games_published ON games(published);
 CREATE INDEX IF NOT EXISTS idx_scores_game ON scores(game_id, score DESC);
 CREATE INDEX IF NOT EXISTS idx_likes_game ON likes(game_id);

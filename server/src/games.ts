@@ -4,6 +4,19 @@ import { authMiddleware, optionalAuth, AuthedRequest } from "./auth";
 
 export const gamesRouter = Router();
 
+// The only messages players can post on a world. No free-form text is
+// accepted, which keeps communication safe by design.
+export const PRESET_PHRASES = [
+  "Great level!",
+  "So much fun!",
+  "Loved the design",
+  "Nice and tricky",
+  "Too hard for me!",
+  "Cool theme",
+  "Awesome jumps",
+  "Want to play again!",
+];
+
 // List published games for the Discover page, with search and sorting.
 gamesRouter.get("/", optionalAuth, async (req: AuthedRequest, res: Response) => {
   const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
@@ -165,6 +178,35 @@ gamesRouter.post("/:id/report", authMiddleware, async (req: AuthedRequest, res: 
     [req.params.id, req.userId, reason]
   );
   res.status(201).json({ ok: true });
+});
+
+// Post a preset reaction to a world (one per player; posting again replaces it).
+gamesRouter.post("/:id/reactions", authMiddleware, async (req: AuthedRequest, res: Response) => {
+  const phrase = req.body?.phrase;
+  if (typeof phrase !== "string" || !PRESET_PHRASES.includes(phrase)) {
+    return res.status(400).json({ error: "Pick one of the preset phrases" });
+  }
+  await query(
+    `INSERT INTO reactions (game_id, user_id, phrase) VALUES ($1, $2, $3)
+     ON CONFLICT (game_id, user_id)
+     DO UPDATE SET phrase = EXCLUDED.phrase, created_at = now()`,
+    [req.params.id, req.userId, phrase]
+  );
+  res.status(201).json({ ok: true });
+});
+
+// Reactions left on a world.
+gamesRouter.get("/:id/reactions", async (req: Request, res: Response) => {
+  const result = await query(
+    `SELECT r.phrase, r.user_id, u.display_name AS player
+       FROM reactions r
+       JOIN users u ON u.id = r.user_id
+      WHERE r.game_id = $1
+      ORDER BY r.created_at DESC
+      LIMIT 50`,
+    [req.params.id]
+  );
+  res.json({ reactions: result.rows });
 });
 
 // Top scores for a game.

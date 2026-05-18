@@ -249,6 +249,27 @@ select:focus { outline: none; border-color: var(--accent); }
   display: flex; align-items: center; gap: 16px; margin: 16px 0 8px;
 }
 
+/* ---- Reactions ---- */
+.phrase-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.phrase-btn {
+  background: var(--panel); border: 1px solid var(--border);
+  color: var(--text); padding: 7px 13px; border-radius: 16px;
+  font-size: 13px; cursor: pointer;
+}
+.phrase-btn:hover { border-color: var(--accent); }
+.phrase-btn.active {
+  border-color: var(--accent-2); background: #241f44; color: var(--accent-2);
+}
+.reaction-list {
+  list-style: none; display: flex; flex-direction: column; gap: 6px;
+  max-width: 460px;
+}
+.reaction-list li {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 9px; padding: 8px 13px; font-size: 14px;
+}
+.reaction-list li b { color: var(--accent-2); }
+
 /* ---- Admin review queue ---- */
 .report-list { display: flex; flex-direction: column; gap: 10px; margin: 12px 0 24px; }
 .report {

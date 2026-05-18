@@ -49,14 +49,14 @@ opening the next.
 - ✅ Featured worlds (currently the most-liked worlds; hand-curated
   featuring will come once admin tooling exists in Phase 4)
 
-### Phase 4 — Safety by design 🔄 In progress
+### Phase 4 — Safety by design ✅ Done
 The platform is kept safe by design, not by heavy moderation: no voice
 chat, no free-form chat (preset phrases + reactions only), no real-money
-payouts. That keeps this phase small and buildable:
+payouts. That kept this phase small and buildable:
 - ✅ Report button on worlds
 - ✅ Admin role with a review queue
 - ✅ Hide / unhide reported content
-- ⬜ Preset-message + reaction system (replaces free-form chat)
+- ✅ Preset-message + reaction system (replaces free-form chat)
 
 ### Phase 5 — Online & multiplayer ⬜ Planned — core goal
 - Real-time multiplayer: several players in the same world at once
@@ -71,6 +71,8 @@ payouts. That keeps this phase small and buildable:
 
 ## Changelog
 
+- **2026-05-18** — Phase 4 complete: preset reactions on worlds (safe,
+  no free-form text).
 - **2026-05-18** — Phase 4 started: report button, admin review queue,
   hide/unhide worlds.
 - **2026-05-18** — Adopted safe-by-design: virtual-only economy, no voice
