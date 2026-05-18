@@ -16,6 +16,8 @@ import {
   ONEWAY,
   MOVER_H,
   MOVER_V,
+  BUTTON,
+  GATE,
   PALETTE,
   THEMES,
   getTheme,
@@ -118,6 +120,16 @@ export default function Editor() {
           ctx.fillStyle = "#fff";
           ctx.font = "14px Segoe UI, sans-serif";
           ctx.fillText(t === MOVER_H ? "↔" : "↕", x + TILE / 2 - 6, y + TILE / 2 + 6);
+        } else if (t === BUTTON) {
+          ctx.fillStyle = "#3a8a68";
+          ctx.fillRect(x + 3, y + TILE - 7, TILE - 6, 7);
+          ctx.fillStyle = "#5fd6a0";
+          ctx.fillRect(x + 6, y + TILE - 10, TILE - 12, 4);
+        } else if (t === GATE) {
+          ctx.fillStyle = "#9a7bd0";
+          ctx.fillRect(x, y, TILE, TILE);
+          ctx.fillStyle = "#b9a0e6";
+          ctx.fillRect(x + TILE / 2 - 2, y + 4, 4, TILE - 8);
         }
       }
     }

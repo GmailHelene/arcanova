@@ -11,6 +11,8 @@ import {
   ONEWAY,
   MOVER_H,
   MOVER_V,
+  BUTTON,
+  GATE,
   getTheme,
 } from "./level";
 import { sfx, music } from "./sound";
@@ -169,6 +171,7 @@ export default function Runtime({ level, onWin, gameId, playerName }: Props) {
     let frames = 0;
     let finished = false;
     let ridingMover: Mover | null = null;
+    let gateOpen = false; // co-op: true while any player holds a button
 
     function spawnPlayer() {
       player.x = level.spawn.col * TILE + (TILE - PW) / 2;
@@ -183,14 +186,39 @@ export default function Runtime({ level, onWin, gameId, playerName }: Props) {
       if (c < 0 || c >= cols || r < 0 || r >= rows) return SOLID; // solid borders
       return tiles[r * cols + c];
     }
-    // Tiles that block movement on every side.
+    // Tiles that block movement on every side. A gate blocks only while closed.
     const blocks = (c: number, r: number) => {
       const t = tileAt(c, r);
-      return t === SOLID || t === BOUNCER;
+      return t === SOLID || t === BOUNCER || (t === GATE && !gateOpen);
     };
+
+    // True if a player box at (px, py) overlaps any button tile.
+    function pressesButton(px: number, py: number) {
+      const c0 = Math.floor(px / TILE);
+      const c1 = Math.floor((px + PW - 1) / TILE);
+      const r0 = Math.floor(py / TILE);
+      const r1 = Math.floor((py + PH - 1) / TILE);
+      for (let r = r0; r <= r1; r++) {
+        for (let c = c0; c <= c1; c++) {
+          if (tileAt(c, r) === BUTTON) return true;
+        }
+      }
+      return false;
+    }
 
     function update() {
       frames++;
+
+      // Co-op: a gate is open while any player stands on any button.
+      gateOpen = pressesButton(player.x, player.y);
+      if (!gateOpen) {
+        for (const peer of peersRef.current.values()) {
+          if (pressesButton(peer.x, peer.y)) {
+            gateOpen = true;
+            break;
+          }
+        }
+      }
 
       // Animate moving platforms; carry the player if standing on one.
       const phase = Math.sin(frames * 0.025);
@@ -274,7 +302,7 @@ export default function Runtime({ level, onWin, gameId, playerName }: Props) {
         const r = Math.floor((player.y + PH) / TILE);
         for (let c = lft; c <= rgt; c++) {
           const t = tileAt(c, r);
-          if (t === SOLID) {
+          if (t === SOLID || (t === GATE && !gateOpen)) {
             player.y = r * TILE - PH;
             player.vy = 0;
             player.onGround = true;
@@ -435,6 +463,21 @@ export default function Runtime({ level, onWin, gameId, playerName }: Props) {
             ctx.fillRect(x, y, TILE, 9);
             ctx.fillStyle = "#97abd6";
             ctx.fillRect(x, y, TILE, 3);
+          } else if (t === BUTTON) {
+            ctx.fillStyle = "#3a8a68";
+            ctx.fillRect(x + 3, y + TILE - 7, TILE - 6, 7);
+            ctx.fillStyle = "#5fd6a0";
+            ctx.fillRect(x + 6, y + TILE - 10, TILE - 12, 4);
+          } else if (t === GATE) {
+            if (gateOpen) {
+              ctx.strokeStyle = "rgba(154,123,208,0.45)";
+              ctx.strokeRect(x + 1, y + 1, TILE - 2, TILE - 2);
+            } else {
+              ctx.fillStyle = "#9a7bd0";
+              ctx.fillRect(x, y, TILE, TILE);
+              ctx.fillStyle = "#b9a0e6";
+              ctx.fillRect(x + TILE / 2 - 2, y + 4, 4, TILE - 8);
+            }
           }
         }
       }

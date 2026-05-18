@@ -63,7 +63,7 @@ Built on persistent websocket connections (a key reason the stack runs on
 Railway rather than a serverless host).
 - ✅ Live presence — players in the same world see each other move in real time
 - ✅ Smoother peer movement (position interpolation)
-- ⬜ Co-op mechanics (shared buttons, shared goals)
+- ✅ Co-op mechanics — buttons and gates (any player on a button opens gates)
 - ⬜ Competitive netcode + server-authoritative anti-cheat
 
 ### Phase 6 — Beyond ⬜ Ideas, not committed
@@ -94,6 +94,8 @@ Decided against:
 
 ## Changelog
 
+- **2026-05-18** — Phase 5: co-op buttons and gates — any player holding a
+  button opens the gates for everyone in the world.
 - **2026-05-18** — Phase 5: peer positions interpolated for smooth movement.
 - **2026-05-18** — Phase 5.1: live presence — a WebSocket server lets
   players in the same world see each other move in real time.

@@ -14,8 +14,10 @@ export const BOUNCER = 5;
 export const ONEWAY = 6;
 export const MOVER_H = 7; // moving platform — travels horizontally
 export const MOVER_V = 8; // moving platform — travels vertically
+export const BUTTON = 9; // co-op pressure plate
+export const GATE = 10; // co-op gate — solid until a button is held
 
-export type TileType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type TileType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export interface Level {
   version: number;
@@ -107,6 +109,8 @@ export const PALETTE: PaletteEntry[] = [
   { type: BOUNCER, label: "Bouncer", color: "#e8a13c" },
   { type: MOVER_H, label: "Mover ↔", color: "#c98a3a" },
   { type: MOVER_V, label: "Mover ↕", color: "#c98a3a" },
+  { type: BUTTON, label: "Button", color: "#5fd6a0" },
+  { type: GATE, label: "Gate", color: "#9a7bd0" },
   { type: SPIKE, label: "Spikes", color: "#d6536d" },
   { type: COIN, label: "Coin", color: "#ffce5c" },
   { type: GOAL, label: "Goal", color: "#4fd6ff" },
