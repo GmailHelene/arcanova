@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { query } from "./db";
 import { authMiddleware, optionalAuth, AuthedRequest } from "./auth";
+import { maxPossibleScore } from "./scoring";
 
 export const gamesRouter = Router();
 
@@ -157,16 +158,27 @@ gamesRouter.post(
   "/:id/scores",
   authMiddleware,
   async (req: AuthedRequest, res: Response) => {
-    // Bound the score to a sane range. This blocks absurd values, but real
-    // anti-cheat would need server-authoritative gameplay (a later concern).
     const raw = Number(req.body?.score);
-    if (!Number.isFinite(raw) || raw < 0 || raw > 10_000_000) {
+    if (!Number.isFinite(raw) || raw < 0) {
       return res.status(400).json({ error: "Invalid score" });
     }
+    const game = await query(`SELECT definition FROM games WHERE id = $1`, [
+      req.params.id,
+    ]);
+    if (!game.rows[0]) return res.status(404).json({ error: "Game not found" });
+
+    // Reject any score above what is mathematically possible for this world.
+    const score = Math.round(raw);
+    if (score > maxPossibleScore(game.rows[0].definition)) {
+      return res
+        .status(400)
+        .json({ error: "Score exceeds what is possible for this world" });
+    }
+
     await query(`INSERT INTO scores (game_id, user_id, score) VALUES ($1, $2, $3)`, [
       req.params.id,
       req.userId,
-      Math.round(raw),
+      score,
     ]);
     await query(`UPDATE games SET plays = plays + 1 WHERE id = $1`, [req.params.id]);
     res.status(201).json({ ok: true });

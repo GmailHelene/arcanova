@@ -58,13 +58,16 @@ payouts. That kept this phase small and buildable:
 - ✅ Hide / unhide reported content
 - ✅ Preset-message + reaction system (replaces free-form chat)
 
-### Phase 5 — Online & multiplayer 🔄 In progress — core goal
+### Phase 5 — Online & multiplayer ✅ Done — core goal
 Built on persistent websocket connections (a key reason the stack runs on
 Railway rather than a serverless host).
 - ✅ Live presence — players in the same world see each other move in real time
 - ✅ Smoother peer movement (position interpolation)
 - ✅ Co-op mechanics — buttons and gates (any player on a button opens gates)
-- ⬜ Competitive netcode + server-authoritative anti-cheat
+- ✅ Anti-cheat — scores validated against each world's maximum possible score
+- Deferred: full server-authoritative netcode (running the whole engine
+  server-side). A multi-week rebuild with ongoing server cost — worth it
+  only if competitive play becomes central. Not part of committed scope.
 
 ### Phase 6 — Beyond ⬜ Ideas, not committed
 - More world types (top-down arena, maze/quest)
@@ -84,8 +87,7 @@ Done:
 - Auth token in an httpOnly, SameSite=Strict cookie (was localStorage)
 
 Pending:
-- Server-authoritative anti-cheat for leaderboards (a Phase 5+ concern —
-  client scores can still be faked despite the sanity bound)
+- (nothing outstanding — see the deferred item under Phase 5)
 
 Decided against:
 - Email verification — does not fit a young audience (many kids have no
@@ -94,6 +96,8 @@ Decided against:
 
 ## Changelog
 
+- **2026-05-18** — Phase 5 complete: scores validated against each world's
+  maximum possible score (proportionate anti-cheat).
 - **2026-05-18** — Phase 5: co-op buttons and gates — any player holding a
   button opens the gates for everyone in the world.
 - **2026-05-18** — Phase 5: peer positions interpolated for smooth movement.
