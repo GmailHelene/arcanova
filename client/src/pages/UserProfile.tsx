@@ -17,23 +17,41 @@ interface Work {
   like_count: number;
 }
 
+interface Stats {
+  publishedWorlds: number;
+  totalPlays: number;
+  totalLikes: number;
+}
+
+interface Badge {
+  id: string;
+  label: string;
+  description: string;
+  earned: boolean;
+}
+
+interface ProfileResponse {
+  user: Profile;
+  games: Work[];
+  stats: Stats;
+  badges: Badge[];
+}
+
 export default function UserProfile() {
   const { id } = useParams();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [games, setGames] = useState<Work[]>([]);
+  const [data, setData] = useState<ProfileResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api<{ user: Profile; games: Work[] }>(`/users/${id}`)
-      .then((res) => {
-        setProfile(res.user);
-        setGames(res.games);
-      })
+    api<ProfileResponse>(`/users/${id}`)
+      .then(setData)
       .catch((e) => setError(e.message));
   }, [id]);
 
   if (error) return <p className="error">{error}</p>;
-  if (!profile) return <p className="muted">Loading profile…</p>;
+  if (!data) return <p className="muted">Loading profile…</p>;
+
+  const { user, games, stats, badges } = data;
 
   return (
     <div>
@@ -41,14 +59,32 @@ export default function UserProfile() {
         ← Back to Discover
       </Link>
       <div className="profile-head">
-        <div className="avatar">{profile.display_name.charAt(0).toUpperCase()}</div>
+        <div className="avatar">{user.display_name.charAt(0).toUpperCase()}</div>
         <div>
-          <h1>{profile.display_name}</h1>
+          <h1>{user.display_name}</h1>
           <p className="muted">
-            @{profile.username} · joined{" "}
-            {new Date(profile.created_at).toLocaleDateString()}
+            @{user.username} · joined{" "}
+            {new Date(user.created_at).toLocaleDateString()}
+          </p>
+          <p className="muted">
+            {stats.publishedWorlds} worlds · {stats.totalPlays} plays · ♥{" "}
+            {stats.totalLikes}
           </p>
         </div>
+      </div>
+
+      <h2>Badges</h2>
+      <div className="badge-row">
+        {badges.map((b) => (
+          <div
+            key={b.id}
+            className={`badge ${b.earned ? "earned" : "locked"}`}
+            title={b.description}
+          >
+            <span className="badge-mark">✦</span>
+            <span>{b.label}</span>
+          </div>
+        ))}
       </div>
 
       <h2>Published worlds</h2>

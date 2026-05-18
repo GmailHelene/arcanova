@@ -69,9 +69,12 @@ Railway rather than a serverless host).
   server-side). A multi-week rebuild with ongoing server cost — worth it
   only if competitive play becomes central. Not part of committed scope.
 
-### Phase 6 — Beyond ⬜ Ideas, not committed
-- More world types (top-down arena, maze/quest)
-- Creator recognition and events
+### Phase 6 — Beyond 🔄 In progress
+- ✅ Creator recognition — badges on profiles (First World, Prolific,
+  Crowd-Pleaser, Beloved), derived from a creator's stats
+- ⬜ More world types (top-down arena, maze/quest) — a multi-session
+  mini-project, like building a second game
+- ⬜ Events
 
 ## Technical hardening
 
@@ -96,6 +99,7 @@ Decided against:
 
 ## Changelog
 
+- **2026-05-18** — Phase 6: creator badges on profiles.
 - **2026-05-18** — Phase 5 complete: scores validated against each world's
   maximum possible score (proportionate anti-cheat).
 - **2026-05-18** — Phase 5: co-op buttons and gates — any player holding a

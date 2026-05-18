@@ -534,6 +534,35 @@ select:focus {
   margin: 16px 0 8px;
 }
 
+/* ---- Creator badges ---- */
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 14px;
+}
+.badge.earned {
+  border-color: var(--gold);
+  color: var(--text);
+  background: rgba(255, 206, 92, 0.12);
+}
+.badge.earned .badge-mark {
+  color: var(--gold);
+}
+.badge.locked {
+  color: var(--muted);
+  opacity: 0.55;
+}
+
 /* ---- Reactions ---- */
 .phrase-picker {
   display: flex;

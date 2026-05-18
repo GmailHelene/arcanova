@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { query } from "./db";
+import { badgesFor } from "./badges";
 
 export const usersRouter = Router();
 
@@ -27,5 +28,17 @@ usersRouter.get("/:id", async (req: Request, res: Response) => {
     [userId],
   );
 
-  res.json({ user: userResult.rows[0], games: games.rows });
+  const rows = games.rows;
+  const stats = {
+    publishedWorlds: rows.length,
+    totalPlays: rows.reduce((sum, g) => sum + g.plays, 0),
+    totalLikes: rows.reduce((sum, g) => sum + g.like_count, 0),
+  };
+
+  res.json({
+    user: userResult.rows[0],
+    games: rows,
+    stats,
+    badges: badgesFor(stats),
+  });
 });
