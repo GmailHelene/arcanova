@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { runMigrations } from "./db";
 import { authRouter } from "./auth";
 import { gamesRouter } from "./games";
@@ -20,6 +21,7 @@ app.set("trust proxy", 1);
 // requests are not needed. Set CLIENT_ORIGIN only if a separate frontend
 // host ever needs access.
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || false }));
+app.use(cookieParser());
 app.use(express.json({ limit: "2mb" }));
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok", service: "arcanova" }));

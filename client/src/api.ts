@@ -1,26 +1,13 @@
-const TOKEN_KEY = "arcanova_token";
-
-export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setToken(token: string | null) {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
-}
-
-// Thin wrapper around fetch that attaches the auth token and parses JSON.
+// Thin fetch wrapper around the API. Authentication is carried by an
+// httpOnly cookie set by the server, so no token is handled on the client.
 export async function api<T = any>(
   path: string,
   options: { method?: string; body?: unknown } = {},
 ): Promise<T> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
-
   const res = await fetch(`/api${path}`, {
     method: options.method ?? "GET",
-    headers,
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   });
 

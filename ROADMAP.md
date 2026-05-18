@@ -80,17 +80,21 @@ Done:
 - Linting + formatting (ESLint + Prettier)
 - Automated tests (Vitest) + CI that runs lint, tests and build on every push
 - Real DB migrations — ordered, transactional, tracked in schema_migrations
+- Auth token in an httpOnly, SameSite=Strict cookie (was localStorage)
 
 Pending:
-- Auth via httpOnly cookies instead of localStorage (CSRF tradeoffs —
-  needs a decision)
-- Email verification (needs an email provider; may not fit a young
-  audience — needs a decision)
 - Server-authoritative anti-cheat for leaderboards (a Phase 5+ concern —
   client scores can still be faked despite the sanity bound)
 
+Decided against:
+- Email verification — does not fit a young audience (many kids have no
+  email of their own). The real future need is a **parental-consent
+  flow**, a legal-grounded feature for a later phase.
+
 ## Changelog
 
+- **2026-05-18** — Auth moved to an httpOnly SameSite=Strict cookie
+  (was localStorage); added a logout endpoint.
 - **2026-05-18** — DB migrations: ordered, transactional migration runner
   (schema_migrations table) replaces apply-schema-on-startup.
 - **2026-05-18** — Tooling: ESLint + Prettier, Vitest test suite, GitHub

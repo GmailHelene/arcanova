@@ -22,13 +22,37 @@ export interface AuthedRequest extends Request {
   userId?: number;
 }
 
+const AUTH_COOKIE = "arcanova_token";
+
+// httpOnly so JavaScript cannot read it; SameSite=Strict blocks CSRF.
+// Secure is enabled in production (https on Railway) and off for local
+// http dev so the cookie still gets set there.
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: "strict" as const,
+  secure: process.env.NODE_ENV === "production",
+  path: "/",
+  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+};
+
+function tokenFromRequest(req: Request): string | null {
+  const token = req.cookies?.[AUTH_COOKIE];
+  return typeof token === "string" ? token : null;
+}
+
+// Signs a session token for the user and sets it as the auth cookie.
+function setSessionCookie(res: Response, userId: number) {
+  const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: "30d" });
+  res.cookie(AUTH_COOKIE, token, cookieOptions);
+}
+
 export function authMiddleware(req: AuthedRequest, res: Response, next: NextFunction) {
-  const header = req.headers.authorization;
-  if (!header || !header.startsWith("Bearer ")) {
+  const token = tokenFromRequest(req);
+  if (!token) {
     return res.status(401).json({ error: "Not signed in" });
   }
   try {
-    const payload = jwt.verify(header.slice(7), JWT_SECRET) as { userId: number };
+    const payload = jwt.verify(token, JWT_SECRET) as { userId: number };
     req.userId = payload.userId;
     next();
   } catch {
@@ -39,10 +63,10 @@ export function authMiddleware(req: AuthedRequest, res: Response, next: NextFunc
 // Like authMiddleware, but never rejects — just sets userId when a valid
 // token is present. Used by public endpoints that personalize when signed in.
 export function optionalAuth(req: AuthedRequest, _res: Response, next: NextFunction) {
-  const header = req.headers.authorization;
-  if (header && header.startsWith("Bearer ")) {
+  const token = tokenFromRequest(req);
+  if (token) {
     try {
-      const payload = jwt.verify(header.slice(7), JWT_SECRET) as { userId: number };
+      const payload = jwt.verify(token, JWT_SECRET) as { userId: number };
       req.userId = payload.userId;
     } catch {
       // Ignore an invalid token on a public route.
@@ -67,12 +91,12 @@ export async function adminMiddleware(
   res: Response,
   next: NextFunction,
 ) {
-  const header = req.headers.authorization;
-  if (!header || !header.startsWith("Bearer ")) {
+  const token = tokenFromRequest(req);
+  if (!token) {
     return res.status(401).json({ error: "Not signed in" });
   }
   try {
-    const payload = jwt.verify(header.slice(7), JWT_SECRET) as { userId: number };
+    const payload = jwt.verify(token, JWT_SECRET) as { userId: number };
     req.userId = payload.userId;
   } catch {
     return res.status(401).json({ error: "Invalid session" });
@@ -103,8 +127,8 @@ authRouter.post("/register", authLimiter, async (req: Request, res: Response) =>
       [username, email, hash, displayName || username],
     );
     const user = result.rows[0];
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "30d" });
-    res.status(201).json({ token, user: publicUser(user) });
+    setSessionCookie(res, user.id);
+    res.status(201).json({ user: publicUser(user) });
   } catch (err: any) {
     if (err?.code === "23505") {
       return res.status(409).json({ error: "Username or email is already taken" });
@@ -128,8 +152,8 @@ authRouter.post("/login", authLimiter, async (req: Request, res: Response) => {
     if (!user || !(await bcrypt.compare(String(password), user.password_hash))) {
       return res.status(401).json({ error: "Wrong username or password" });
     }
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "30d" });
-    res.json({ token, user: publicUser(user) });
+    setSessionCookie(res, user.id);
+    res.json({ user: publicUser(user) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Could not sign in" });
@@ -143,4 +167,9 @@ authRouter.get("/me", authMiddleware, async (req: AuthedRequest, res: Response) 
   );
   if (!result.rows[0]) return res.status(404).json({ error: "User not found" });
   res.json({ user: publicUser(result.rows[0]) });
+});
+
+authRouter.post("/logout", (_req: Request, res: Response) => {
+  res.clearCookie(AUTH_COOKIE, { path: "/" });
+  res.json({ ok: true });
 });

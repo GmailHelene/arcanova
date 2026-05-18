@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { api, getToken, setToken } from "./api";
+import { api } from "./api";
 
 export interface User {
   id: number;
@@ -28,24 +28,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore the session on first load if a token is stored.
+  // Restore the session on first load — the auth cookie is sent automatically.
   useEffect(() => {
-    if (!getToken()) {
-      setLoading(false);
-      return;
-    }
     api<{ user: User }>("/auth/me")
       .then((res) => setUser(res.user))
-      .catch(() => setToken(null))
+      .catch(() => {
+        // Not signed in — that's fine.
+      })
       .finally(() => setLoading(false));
   }, []);
 
   async function login(login: string, password: string) {
-    const res = await api<{ token: string; user: User }>("/auth/login", {
+    const res = await api<{ user: User }>("/auth/login", {
       method: "POST",
       body: { login, password },
     });
-    setToken(res.token);
     setUser(res.user);
   }
 
@@ -55,16 +52,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string;
     displayName: string;
   }) {
-    const res = await api<{ token: string; user: User }>("/auth/register", {
+    const res = await api<{ user: User }>("/auth/register", {
       method: "POST",
       body: data,
     });
-    setToken(res.token);
     setUser(res.user);
   }
 
-  function logout() {
-    setToken(null);
+  async function logout() {
+    await api("/auth/logout", { method: "POST" }).catch(() => {});
     setUser(null);
   }
 
