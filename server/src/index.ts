@@ -11,6 +11,7 @@ import { gamesRouter } from "./games";
 import { usersRouter } from "./users";
 import { adminRouter } from "./admin";
 import { attachPresence } from "./presence";
+import { seedWorlds } from "./seed";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
@@ -43,6 +44,7 @@ if (fs.existsSync(clientDist)) {
 
 async function start() {
   await runMigrations();
+  await seedWorlds().catch((e) => console.error("Seeding failed:", e));
   const server = http.createServer(app);
   attachPresence(server);
   server.listen(PORT, () =>

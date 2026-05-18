@@ -271,6 +271,12 @@ export default function Editor() {
         ← Back to your creations
       </Link>
       <h1>{title}</h1>
+      {!testing && (
+        <p className="muted">
+          Pick a tile from the palette, paint it on the grid, place the Start
+          point, then press Test play.
+        </p>
+      )}
 
       {testing ? (
         <div>

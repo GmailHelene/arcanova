@@ -75,6 +75,8 @@ Railway rather than a serverless host).
 - ✅ Second world type — top-down arena (walls, gems, enemies, exit),
   with live multiplayer presence. Worlds are tagged with a `kind`; the
   editor and runtime adapt.
+- ✅ Example worlds seeded on first startup (a platformer + an arena)
+- ✅ First-time help in the editor
 - ⬜ More world types (maze/quest)
 - ⬜ Events
 
@@ -101,6 +103,8 @@ Decided against:
 
 ## Changelog
 
+- **2026-05-18** — Phase 6: example worlds seeded on first startup;
+  first-time help text in the editor.
 - **2026-05-18** — Phase 6: live multiplayer presence added to arena worlds.
 - **2026-05-18** — Phase 6: top-down arena world type (a second world
   kind) — walls, gems, enemies and an exit, with its own editor and runtime.
